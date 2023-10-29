@@ -24,7 +24,7 @@ def get_args():
     """
     parser = argparse.ArgumentParser(
         description=('Default prints integer list all results).'),
-        prog='print_fires'
+        prog='query_categ_plot'
     )
     parser.add_argument('--file-name',
                         type=str,
