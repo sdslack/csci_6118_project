@@ -1,4 +1,4 @@
-"""Queries and prints column specificed by user input
+"""Queries and plots histogram of column specificed by user input
 
         * get_args - gets command line arguments.
         * run_get_col_all - runs get_col_all from sds_utils
