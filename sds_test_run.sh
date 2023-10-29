@@ -8,9 +8,10 @@ set -o pipefail  # fail if any prior step failed
 # (int), value to query, and optional result column (int).
 
 # Set parameters
-file_name="test/data/LANL_HIV1_2023_seq_metadata.txt"
-categ_column=15
+file_name="test/data/LANL_HIV1_2023_seq_metadata.csv"
+categ_column=3
 
 # Run current code
 python src/sds/query_categ_plot.py \
-    --file-name "$file_name" --categ-column $categ_column
+    --file-name "$file_name" --categ-column $categ_column \
+    --plot-path "test/output" \
