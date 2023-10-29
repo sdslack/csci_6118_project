@@ -9,7 +9,7 @@ set -o pipefail  # fail if any prior step failed
 
 # Set parameters
 file_name="test/data/LANL_HIV1_2023_seq_metadata.csv"
-categ_column=3
+categ_column=24  # subtype
 
 # Run current code
 python src/sds/query_categ_plot.py \
