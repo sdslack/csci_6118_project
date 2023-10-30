@@ -22,6 +22,10 @@ def get_args():
 
 def main():
     args = get_args()
+    file_name = str(args.file_name)
+    query_column = str(args.query_column)
+    query_comparison = str(args.query_comparison)
+    query_value = args.query_value
     # Create a table which tracks query requests
     try:
         # Read in Data
