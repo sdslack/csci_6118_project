@@ -1,0 +1,9 @@
+name: csci6118
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python
+  - pycodestyle
+  - wget
+  - matplotlib
