@@ -4,7 +4,7 @@ import sys
 # Create a query function which will change values on the query tracking table
 def output_query_summary(column_name_of_interest, filter_param, value):
     """Output is a pandas dataframe.
-    It describes the chosen parametrs for a database search.
+    It describes the chosen parameters for a database search.
 
     Parameters
     ----------

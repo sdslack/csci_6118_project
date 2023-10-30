@@ -9,12 +9,17 @@ The challene of curing HIV:
 + Current therapies involve taking daily medication
 + We want a vaccine instead
 
-Sequences can help! Why? Early sequences are more helpful because
-they represent virus fit enough to transmit and infect a new individual.
+Sequences can help! Why? 
 
++ Early sequences are more helpful because 
+    they represent virus fit enough to transmit and infect a new individual.
++ We can identify countries/geographic areas
+    facing a new mutation in the HIV virus
++ We can understand how differences in the virus
+    correspond to differences in clinical outcomes
 TODO: add more here based on what example we choose?
 
-The Los Alamos National Laboratory HIV Database contains around 1 million
+The Los Alamos National Laboratory HIV Database contains over 1 million
 HIV genetic sequences along with comprehensive metadata. It is a goverment-
 funded database that is updated biweekly to monthly. The database can be
 queried manually at the following link:
@@ -72,7 +77,30 @@ included in the project repository.
 
 Python3 and bash are required to run the code in this project.
 
-TODO: add R?
+The dependencies for Python3 are:
++ Numpy
++ Pandas
+
+You can install these with the following code within the terminal:
+```
+conda install numpy
+conda install pandas
+
+```
+
+The dependencies for R are:
++ ggplot2
++ janitor
++ dplyr
+
+You can install these with the following code within the terminal:
+
+```
+Rscript -e 'install.packages("ggplot2", repos="https://cloud.r-project.org")'
+Rscript -e 'install.packages("janitor", repos="https://cloud.r-project.org")'
+Rscript -e 'install.packages("dplyr", repos="https://cloud.r-project.org")'
+
+```
 
 The example bash script sds_teset_run.sh should be executed from the top
 level of the repository.
@@ -134,4 +162,21 @@ TODO: update this if we want to keep it?
 
 ### **Functions**
 
+Within the gg folder, all scripts help create 
+    a .png file containing a consort diagram. This diagram helps explain
+    which sequences were excluded or included based on given search criteria.
+    A run.sh file has been provided as an example.
+    The scripts must be run in the following order:
+    1. query_functions.py to allow for creation of important functions
+        There are two different functions within this file.
+        subset_dataframe_by_names() will subset a dataset by column name.
+        output_query_summary() changes the query.csv file to reflect
+            query parameters.
+    2. make_query.py to create queries for the database
+    3. data_subsetting.py to prepare the data for the R scropt
+    4. consort_plot.r which will generate the consort plot
+    
+
 TODO: need to add function descriptions here!
+
+### **Change Log***
