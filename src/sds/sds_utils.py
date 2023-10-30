@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 
+
 def get_col_all(file_name, categ_col):
     """ Queries the given file and returns all values from
     the requested column.
@@ -27,12 +28,8 @@ def get_col_all(file_name, categ_col):
         List of all values from the requested column
     """
     result = []
-    # line_num = 0
     with open(file_name, 'r') as file:
         for line in file:
-            # line_num += 1
-            # if line_num < 2:  # skip header
-                # continue
             line = line.rstrip().split(',')
             try:
                 line[categ_col]
@@ -41,6 +38,7 @@ def get_col_all(file_name, categ_col):
                 sys.exit(1)
             result.append(line[categ_col])
     return result
+
 
 def plot_hist(result_col, output_path):
     """Plots histogram of values in a file. Writes out as .png.
@@ -52,7 +50,7 @@ def plot_hist(result_col, output_path):
     output_path : str
         Path to write output plot to
     """
-    result_col = [val.replace('"', '') for val in result_col]  # remove double quotes
+    result_col = [val.replace('"', '') for val in result_col]  # remove ""
     x_label = result_col[0]  # use column name
     y_label = 'Count'
     title = 'Histogram of ' + x_label + ' Category Counts'  # use column name
@@ -77,5 +75,5 @@ def plot_hist(result_col, output_path):
     plt.xticks(rotation=45)
 
     file_name = x_label + '_hist.png'  # use column name
-    
+
     plt.savefig(output_path + '/' + file_name, bbox_inches='tight')

@@ -27,14 +27,17 @@ class TestSdsUtils(unittest.TestCase):
 
     def test_get_col_all(self):
         r = sds_utils.get_col_all(self.test_file, 2)
-        self.assertEqual(r, ['Georegion', 'Europe', 'Middle-East', 'North America'])
+        self.assertEqual(r, ['Georegion', 'Europe',
+                             'Middle-East', 'North America'])
 
     def test_get_col_all_index_error(self):
-        self.assertRaises(SystemExit, sds_utils.get_col_all, self.test_file, 10)
+        self.assertRaises(SystemExit, sds_utils.get_col_all,
+                          self.test_file, 10)
 
     def test_get_col_all_non_int(self):
-        self.assertRaises(TypeError, sds_utils.get_col_all, self.test_file, 'a')
-    
+        self.assertRaises(TypeError, sds_utils.get_col_all,
+                          self.test_file, 'a')
+
     def test_get_col_all_empty_file(self):
         r = sds_utils.get_col_all(self.empty_file, 2)
         self.assertEqual(r, [])
@@ -46,4 +49,4 @@ class TestSdsUtils(unittest.TestCase):
 
     def test_plot_hist_empty_file(self):
         self.assertRaises(IndexError, sds_utils.plot_hist, [], './')
-            # TODO: may want to later handle this error differently
+        # TODO: may want to later handle this error differently

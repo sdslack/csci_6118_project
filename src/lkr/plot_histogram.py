@@ -1,6 +1,7 @@
 import csv
 import matplotlib.pyplot as plt
 
+
 def plot_histogram_from_csv(csv_file, output_png):
     # Read the CSV file and extract data
     days = []
@@ -25,10 +26,12 @@ def plot_histogram_from_csv(csv_file, output_png):
     plt.savefig(output_png, format='png')
     plt.close()
 
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
-        print("Usage: python plot_histogram.py <input_csv_file> <output_png_file>")
+        print("Usage: python plot_histogram.py <input_csv_file> " +
+              "<output_png_file>")
         sys.exit(1)
 
     input_csv = sys.argv[1]

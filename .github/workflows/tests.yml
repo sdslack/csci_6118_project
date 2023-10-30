@@ -1,0 +1,24 @@
+name: Tests
+
+on:
+    pull_request:
+        branches:
+            - master
+    push:
+        branches:
+            - '*'
+
+jobs:
+    run_style_tests:
+      runs-on: ubuntu-latest
+      defaults:
+         run:
+            shell: bash -el {0}
+      steps:
+         - uses: actions/checkout@v2
+         - uses: mamba-org/setup-micromamba@v1
+           with:
+               environment-file: test/etc/csci6118_env.yml
+               environment-name: csci6118
+         - run: |
+            find . -name "*.py" -print0 | xargs -0 pycodestyle

@@ -1,5 +1,6 @@
 import csv
 
+
 def count_sequences_by_column(csv_file, column_number, output_file):
     # Create a dictionary to store the counts
     counts = {}
@@ -28,10 +29,12 @@ def count_sequences_by_column(csv_file, column_number, output_file):
         for days, count in counts.items():
             writer.writerow([days, count])
 
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 4:
-        print("Usage: python count_sequences.py <input_csv_file> <column_number> <output_csv_file>")
+        print("Usage: python count_sequences.py <input_csv_file> " +
+              "<column_number> <output_csv_file>")
         sys.exit(1)
 
     csv_file = sys.argv[1]

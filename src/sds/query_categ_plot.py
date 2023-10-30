@@ -12,10 +12,11 @@ import argparse
 import sys
 import sds_utils
 
+
 # TODO: need to query by col name, not position
 def get_args():
     """Get command line arguments.
-    
+
     Returns
     -------
     args : argparse.Namespace
@@ -40,15 +41,16 @@ def get_args():
                         help='Path to write output plot to')
     args = parser.parse_args()
     return args
-    
+
+
 def run_get_col_all(args):
     """Runs get_col_all and returns results.
-    
+
     Parameters
     ----------
     args : argparse.Namespace
         Arguments from command line
-    
+
     Returns
     -------
     result : list of str
@@ -73,9 +75,10 @@ def run_get_col_all(args):
     result = sds_utils.get_col_all(args.file_name, args.categ_column)
     return result
 
+
 def run_plot_hist(args, col):
     """Runs plot_hist and writes out plot.
-    
+
     Parameters
     ----------
     col : list of str
@@ -95,7 +98,7 @@ def run_plot_hist(args, col):
         f.close()
         os.remove(output_path + '/test.txt')
     sds_utils.plot_hist(col, output_path)
-   
+
 
 if __name__ == '__main__':
     """Runs get_args, run_get_col_all, and run_plot_hist.

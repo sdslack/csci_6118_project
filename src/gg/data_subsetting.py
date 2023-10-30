@@ -29,7 +29,7 @@ def main():
         sys.exit(1)
     # Create subset of dataset based on search options
     lanl_query_col = query.loc[
-        query['Search by this column?'] == "Yes", 
+        query['Search by this column?'] == "Yes",
         'Search_Options'].tolist()
     consort_input_df_pre = qf.subset_dataframe_by_names(lanl, lanl_query_col)
     # Subset the query dataset to only the important columns
@@ -80,7 +80,7 @@ def main():
                 else:
                     consort_input_df.at[q, exclude_col_name] =
                     consort_input_df.at[q, filtered_column]
-                    consort_input_df.at[q, include_col_name] = "Excluded" 
+                    consort_input_df.at[q, include_col_name] = "Excluded"
     try:
         # Write .csv file for data
         consort_input_df = 'src/gg/consort_input_df.csv'
