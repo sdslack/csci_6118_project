@@ -105,12 +105,17 @@ Rscript -e 'install.packages("dplyr", repos="https://cloud.r-project.org")'
 The example bash script sds_teset_run.sh should be executed from the top
 level of the repository.
 
-Unit tests (located at test/unit), functional tests (test/func), and style
-tests for python (PEP8, tested using pycodestyle), are executed when
-any branch is pushed to the GitHub-hosted repository as well as when a pull
-request is made on the main branch on GitHub. 
+Unit tests are located at test/unit and functional tests (which use the Stupid
+Simple Bash Testing Framework) are loated at test/func. They can be run from
+inside each respective directory, and are not currently implemented to
+automatically run.
 
-TODO: need to actually include tests and set up workflows file?
+Style tests for python (PEP8, tested using pycodestyle), are executed when
+any branch is pushed to the GitHub-hosted repository as well as when a pull
+request is made on the main branch on GitHub. The code that runs these tests
+is located at .github/workflows/tests.yml. In order to run pycodestyle, the
+tests sets up mamba environment "csci6118" using its environment file at test/etc/csci6118_env.yml
+
 
 ### **Step by Step Installation Instructions**
 
