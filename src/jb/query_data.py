@@ -16,7 +16,7 @@ Notes:
     - less than or greater than the field ex. "col<10" or "col>10" (exclusive)
     - multiple filters ex. "col:7,<5,9-12"
 - for categorical fields, filters are a list of comma separated names
-    - ex. "col=banana,red,blue"
+    - ex. "col:banana,red,blue"
 """
 
 import argparse
