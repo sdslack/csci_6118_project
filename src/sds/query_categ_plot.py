@@ -24,7 +24,8 @@ def get_args():
 
     """
     parser = argparse.ArgumentParser(
-        description=('Default prints integer list all results).'),
+        description=('Queries and plots histogram of values from ' +
+                     'any column from the input data.'),
         prog='query_categ_plot'
     )
     parser.add_argument('--file-name',
