@@ -21,17 +21,24 @@ TODO: add more here based on what example we choose?
 
 The Los Alamos National Laboratory HIV Database contains over 1 million
 HIV genetic sequences along with comprehensive metadata. It is a goverment-
-funded database that is updated biweekly to monthly. The database can be
-queried manually at the following link:
+funded database that is updated biweekly to monthly, and it includes
+information about genetic HIV sequences including where they were isolated,
+health status of the patient infected, year when collected, virus subtype,
+and more. The database can be queried manually at the following link:
 
 https://www.hiv.lanl.gov/components/sequence/HIV/search/search.html
 
 ### **Project Rationale**
 
-This project provides the code needed to summarize database query
+This project aims to provide the code needed to summarize database query
 selections from the Los Alamos HIV Sequence Database. Although the database
 can be queried manually at the link included above, this is not necessarily
-ideal and can lead to unwanted biases.
+ideal and can lead to unwanted biases. Our repository aims to filter the
+large dataset based on a number of search criteria, then create several plots
+based on that search. The goal is to offer the user a better understanding of
+the data available in the database before deciding what to download, as well
+as to offer an understanding of how different filtering choices would affect
+how many and which entries from the dataset are downloaded. 
 
 **What is the problem with manual queries?**
 
@@ -53,8 +60,9 @@ Develop a codebase to summarize data from the HIV database:
 
 + Visualize the available metadata included with genetic sequences
 + Allow for better selection of sequences for download
++ Improve understanding of how query choices narrow available data
 
-TODO: add example plot here?
+TODO: add example plots here?
 
 **Reach Goal: Automate visualization and searching**
 
