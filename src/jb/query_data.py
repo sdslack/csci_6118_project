@@ -6,7 +6,6 @@ Need to think about:
     - what and how many filters they want to filter their data by
 
 Notes:
-<<<<<<< HEAD
 =======
 - takes in the filters as an entire string
     - separate parameters for categorical filters vs numerical filters
@@ -18,7 +17,6 @@ Notes:
     - multiple filters ex. "col:7,<5,9-12"
 - for categorical fields, filters are a list of comma separated names
     - ex. "col=banana,red,blue"
->>>>>>> 39c33bb (fixed parameters)
 """
 
 import argparse
@@ -68,10 +66,7 @@ def filter_data(data, filters):
     filtered_data = data
     for key, values in filters.items():
         # Categorical variable filter
-<<<<<<< HEAD
-=======
         if data[key].dtype == 'object':
->>>>>>> 39c33bb (fixed parameters)
             filtered_data = filtered_data[filtered_data[key].isin(values)]
         # Numerical variable filter
         else:
@@ -84,12 +79,9 @@ def filter_data(data, filters):
                         filtered_data[key] > float(value[1:])]
                 elif '-' in value:
                     lower, upper = map(float, value.split('-'))
-<<<<<<< HEAD
-=======
                     filtered_data = filtered_data[(filtered_data[key] > lower) & (filtered_data[key] < upper)]
                 elif '=' in value:
                     filtered_data = filtered_data[filtered_data[key] == float(value[1:])]
->>>>>>> 39c33bb (fixed parameters)
     return filtered_data
 
 
@@ -100,8 +92,6 @@ def main():
     parser.add_argument("--file",
                         type=str,
                         help="Path to the CSV data file")
-<<<<<<< HEAD
-=======
     parser.add_argument("--categorical_filters",
                         type=str,
                         help="Filter criteria for categorical variables (format in README)",
@@ -114,7 +104,6 @@ def main():
                         type=str,
                         help="Path to output CSV file",
                         required=True)
->>>>>>> 39c33bb (fixed parameters)
 
     args = parser.parse_args()
 
@@ -124,8 +113,6 @@ def main():
         # dictionary for filters
         filters = {}
 
-<<<<<<< HEAD
-=======
         # if there are any categorical filters
         if args.categorical_filters != "":
             categorical_filters = {}
@@ -157,7 +144,6 @@ def main():
                 numerical_filters[key] = values
             filters.update(numerical_filters)
 
->>>>>>> 39c33bb (fixed parameters)
         # filter the data
         filtered_data = filter_data(data, filters)
 
