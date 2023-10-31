@@ -79,9 +79,12 @@ def filter_data(data, filters):
                         filtered_data[key] > float(value[1:])]
                 elif '-' in value:
                     lower, upper = map(float, value.split('-'))
-                    filtered_data = filtered_data[(filtered_data[key] > lower) & (filtered_data[key] < upper)]
+                    filtered_data = filtered_data[
+                        (filtered_data[key] > lower)
+                        & (filtered_data[key] < upper)]
                 elif '=' in value:
-                    filtered_data = filtered_data[filtered_data[key] == float(value[1:])]
+                    filtered_data = filtered_data[filtered_data[key]
+                                                  == float(value[1:])]
     return filtered_data
 
 
@@ -94,11 +97,11 @@ def main():
                         help="Path to the CSV data file")
     parser.add_argument("--categorical_filters",
                         type=str,
-                        help="Filter criteria for categorical variables (format in README)",
+                        help="Filter criteria for categorical variables",
                         default="")
     parser.add_argument("--numerical_filters",
                         type=str,
-                        help="Filter criteria for numerical variables (format in README)",
+                        help="Filter criteria for numerical variables",
                         default="")
     parser.add_argument("--output_file",
                         type=str,
@@ -140,7 +143,8 @@ def main():
                 key = key.strip()
                 values = values.split(',')
                 values = [val.strip() for val in values]  # Remove extra spaces
-                values = [val if any(op in val for op in ['<', '>', '-', '=']) else float(val) for val in values]
+                values = [val if any(op in val for op in ['<', '>', '-', '='])
+                          else float(val) for val in values]
                 numerical_filters[key] = values
             filters.update(numerical_filters)
 
