@@ -2,7 +2,7 @@
 
 ### **Scientific Background**
 
-The challene of curing HIV:
+The challenge of curing HIV:
 
 + 1.5 million new infections/year 
 + 42 years since first known cases
@@ -75,17 +75,19 @@ included in the project repository.
 
 ### **Dependencies**
 
-Python3 and bash are required to run the code in this project.
+Python3, bash, and R are required to run the code in this project.
 
 The dependencies for Python3 are:
 + Numpy
 + Pandas
++ matplotlib
 
 You can install these with the following code within the terminal:
-```
+
+``` bash
 conda install numpy
 conda install pandas
-
+conda install matplotlib
 ```
 
 The dependencies for R are:
@@ -95,7 +97,7 @@ The dependencies for R are:
 
 You can install these with the following code within the terminal:
 
-```
+``` bash
 Rscript -e 'install.packages("ggplot2", repos="https://cloud.r-project.org")'
 Rscript -e 'install.packages("janitor", repos="https://cloud.r-project.org")'
 Rscript -e 'install.packages("dplyr", repos="https://cloud.r-project.org")'
@@ -125,21 +127,26 @@ cd csci_6118_project
 ls
 ```
 ```
-LICENSE  README.md  sds_test_run.sh  src/ test/
+LICENSE  README.md  docs/  src/ test/
 ```
 
-This document is the README.md, sds_test_run.sh is a bash script that runs
-examples, and src/ contains the source code for this project.
+This document is the README.md, docs/ contains any data or plots written
+out by the currently implemented code, src/ contains the source code
+for this project, and test/ contains the unit and functional tests.
 
 4. The subset of test data download from the Los Alamos HIV Sequence
     Database is located at test/data/LANL_HIV1_2023_seq_metadata.csv.
-    This file can be downloaded from the following link
 
-5. The example bash script can be run with the following code:
+5. The src/ directory is currently split so that each team member has a
+    separate folder. Inside some of these folders, there are bash scripts
+    that can be used to run examples:
 
 ```bash
+cd src/sdslack
 bash sds_test_run.sh
 ```
+    Nothing is printed upon successful execution, but a plot is added to the
+    docs/ folder, named according to the column that was selected.
 
 # **Testing**
 
@@ -172,17 +179,36 @@ tests sets up mamba environment "csci6118" using its environment file at test/et
 
 ### **Examples**
 
-The bash script sds_test_run.sh includes TBD:
+Inside each team member's folder in src/, there is a bash script that can be
+run as an example to execute the code. For example:
 
 ```bash
+cd src/lkr
 bash run.sh
 ```
-TODO: update this if we want to keep it?
 
+```bash
+cd src/jb
+bash run_query_data.sh
+```
 
-### **Functions**
+```bash
+cd src/gg
+bash run.sh
+```
 
-Within the gg folder, all scripts help create 
+# **Functions**
+
+### **Plotting Code**
+
+*To note: queries to make the plots are currently implemented separately*
+*by each team member, but the goal is to eventually have all queries*
+*implemented by the main querying code (described in the next section)*
+*located at src/jb/query_data.py.*
+
+**src/gg**
+
+Within the src/gg folder, all scripts help create 
     a .png file containing a consort diagram. This diagram helps explain
     which sequences were excluded or included based on given search criteria.
     A run.sh file has been provided as an example.
@@ -196,10 +222,92 @@ Within the gg folder, all scripts help create
     3. data_subsetting.py to prepare the data for the R scropt
     4. consort_plot.r which will generate the consort plot
     
+**src/sds**
 
-TODO: need to add function descriptions here!
+In the src/sds folder, sds_test_run.sh runs an example of the code that
+will create a histogram plot of the HIV subtypes in the test data. This is
+the plot that is created based on the selection of column 24 in the test
+data, but selecting a different column would cause the data in that column
+to be plotting instead, and would update plot labels as well as plot title.
+
+The test bash script can be run as follows:
+
+```bash
+cd src/sds
+bash sds_test_run.sh
+```
+
+This will run query_categ_plot.py with the inputs given in the bash script
+(the path to the test data file and the column number to query). The help
+information for query_categ_plot.py clarifies this:
+
+``` bash
+python query_categ_plot.py --help
+```
+
+```
+usage: query_categ_plot [-h] --file-name FILE_NAME --categ-column CATEG_COLUMN --plot-path PLOT_PATH
+
+Queries and plots histogram of values from any column from the input data.
+
+options:
+  -h, --help            show this help message and exit
+  --file-name FILE_NAME
+                        Name of the data file to read
+  --categ-column CATEG_COLUMN
+                        Number of categorical column to query
+  --plot-path PLOT_PATH
+                        Path to write output plot to
+```
+
+The output plot is written to the docs/ folder and is named according to the
+name of the column selected. The query_categ_plot.py script calls on the
+functions in sds_utils.py:
+
++ get_col_all - returns the values from a given column in a file
++ plot_hist - plots a histogram of values passed in
+
+The docustring for these functions can be accessed with the following code:
+
+```bash
+cd src/sds
+python
+import sds_utils
+sds_utils.get_col_all.__doc__
+sds_utils.plot_hist.__doc__
+```
+
+```bash
+# For get_col_all
+Queries the given file and returns all values from
+the requested column.
+
+Parameters
+----------
+file_name : str
+    Name of the file to query
+categ_col : int
+    Number of the column to query
+
+Returns
+-------
+result : list of str
+    List of all values from the requested column 
+
+# For plot_hist
+Plots histogram of values in a file. Writes out as .png.
+
+Parameters
+----------
+result_col : list of str
+    List of all values from the requested column
+output_path : str
+    Path to write output plot to   
+```
 
 ### **Main Querying Code**
+
+**src/jb**
 
 In the jb folder within the source folder, is the query_data.py script that will execute the main querying functionalities for the data. The code will essentially query an inputted data file based on provided querying filters for the data and then output a csv file of the filtered data. The way filter criteria are inputted must follow the correct format. 
 
@@ -225,10 +333,13 @@ The code will take in four main parameters:
     - The code can also take multiple variable filter criteria for each individual variable to filter and must be comma separated --> "col_name:=7,9-15,>20"
 4. --output_file: Name of output file
 
+
 **Example Input**
 This is an example to show ways input can be written. This can be used on the test data file but will come up with nothing and there are a limited number of examples that can be provided with this many filters since the data file is small. 
 ```
 python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv --categorical_filters "Subtype:B,35_A1D && Georegion:North America" --numerical_filters "Sequence Length:1035-2025,<915 && Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv
 ```
+
 ### **Change Log***
 
+TODO: update this!
