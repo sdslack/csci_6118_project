@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 
 
 # Create a query function which will change values on the query tracking table
@@ -26,27 +27,31 @@ def output_query_summary(column_name_of_interest, filter_param, value):
         Updated with the search query modifications through this summary
     """
     try:
-        query.empty() == FALSE
+        query = pd.read_csv('data/query_requests.csv')
     except NameError:
         print("The query dataframe cannot be found.")
-        sys.error(1)
-    if column_name_of_interest not in query.columns:
+        sys.exit(1)
+    col_name_list = query.Search_Options.tolist()
+    column_name_of_interest_list = [column_name_of_interest]
+    if (any(x in column_name_of_interest_list
+            for x in column_name_of_interest_list) == 'False'):
         # Handle the case where no matching columns are found
-        print("No filter criteria found. Please check query df.")
+        raise ValueError("No filter criteria found. Please check query df.")
         sys.exit(1)
     column_name_of_interest = str(column_name_of_interest)
     filter_param_valid = ["equal to", "not equal to",
                           "less than", "greater than"]
-    if filter_param not in filter_param_valid:
-        print("Incorrect input for filter_param")
+    filter_param_list = [filter_param]
+    if (any(x in filter_param_valid
+            for x in filter_param_list) == 'False'):
+        raise ValueError("Incorrect input for filter_param")
         sys.exit(1)
-    if filter_param == ("less than", "greater than") & isinstance(value, str):
-        print("Please input a float or integer datatype for value parameter")
-    for i in range(len(query)):
-        if query.loc[i, "Search_Options"] == column_name_of_interest:
-            query.at[i, "Do you plan to search by this column?"] = True
-            query.at[i, "How do you want to filter?"] = filter_param
-            query.at[i, "Filter Value"] = value
+    query.loc[query.Search_Options == column_name_of_interest,
+              'Do you plan to search by this column?'] = "Yes"
+    query.loc[query.Search_Options == column_name_of_interest,
+              'How do you want to filter?'] = filter_param
+    query.loc[query.Search_Options == column_name_of_interest,
+              'Filter Value'] = value
     return query
 
 
@@ -72,8 +77,10 @@ def subset_dataframe_by_names(data, column_names):
     except NameError:
         print("The dataframe cannot be found.")
         sys.error(1)
-    if column_names in data.columns:
-        data_subset = data[column_names]
+    column_names_of_interest_list = [column_names]
+    col_name_list = data.columns.tolist()
+    if (any(x in col_name_list for x in column_name_of_interest_list)):
+        data_subset = data[[column_names]]
         return data_subset
     else:
         # Handle the case where no matching columns are found

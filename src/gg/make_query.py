@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import query_functions as qf
 import sys
 import argparse
 
@@ -30,27 +31,31 @@ def main():
     try:
         # Read in Data
         lanl = pd.read_csv(file_name)
-    except FileNotFound:
+    except FileNotFoundError:
         print("Unable to find .csv file")
         sys.exit(1)
     try:
-        if isinstance(query, pd.DataFrame):
-            return query
-    except (NameError, AttributeError):
-        query = {
+        query = pd.read_csv('data/query_requests.csv')
+    except FileNotFoundError:
+        query_pre = {
             'Search_Options': lanl.columns,
             'Search by this column?':
             ["No"] * len(lanl.columns),
             'How do you want to filter?': [None] * len(lanl.columns),
             'Filter Value': [None] * len(lanl.columns)}
-        query_pd = pd.DataFrame(query)
+        query = pd.DataFrame(query_pre)
+        try:
+            # Write .csv file tracking query_requests
+            query.to_csv('data/query_requests.csv', sep=',', index='False')
+        except Exception as e:
+            print(f"Unable to write .csv file.")
+            sys.exit(1)
     # Call user input function and resave as the query table
-    query = cwf.output_query_summary("query_column",
-                                     "query_comparison", "query_value")
+    query = qf.output_query_summary("query_column",
+                                    "query_comparison", "query_value")
     try:
         # Write .csv file tracking query_requests
-        query_requests = 'src/gg/query_requests.csv'
-        df.to_csv(query_requests, index=False)
+        query.to_csv('data/query_requests.csv', sep=',', index='False')
     except Exception as e:
         print(f"Unable to write .csv file.")
         sys.exit(1)
