@@ -1,4 +1,6 @@
 import csv
+import matplotlib.pyplot as plt
+
 
 
 def count_sequences_by_column(csv_file, column_number, output_file):
@@ -28,19 +30,28 @@ def count_sequences_by_column(csv_file, column_number, output_file):
         writer.writerow(['Days from Infection', 'Number of Sequences'])
         for days, count in counts.items():
             writer.writerow([days, count])
+            
 
+def plot_histogram_from_csv(csv_file, output_png):
+    # Read the CSV file and extract data
+    days = []
+    counts = []
+    with open(csv_file, newline='') as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip the header
+        for row in reader:
+            day, count = map(int, row)
+            days.append(day)
+            counts.append(count)
 
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 4:
-        print("Usage: python count_sequences.py <input_csv_file> " +
-              "<column_number> <output_csv_file>")
-        sys.exit(1)
+    # Create a histogram plot
+    plt.figure(figsize=(10, 6))
+    plt.bar(days, counts, align='center', width=1.0)
+    plt.xlabel('Days from Infection')
+    plt.ylabel('Number of Sequences')
+    plt.title('Sequence Counts by Days from Infection')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
 
-    csv_file = sys.argv[1]
-    column_number = int(sys.argv[2])
-    output_file = sys.argv[3]
-
-    count_sequences_by_column(csv_file, column_number, output_file)
-
-print("Analysis complete. Results saved to", output_file)
+    # Save the plot as a PNG file
+    plt.savefig(output_png, format='png')
+    plt.close()
