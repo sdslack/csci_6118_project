@@ -106,9 +106,7 @@ The dependencies for R are:
 You can install these with the following code within the terminal:
 
 ``` bash
-Rscript -e 'install.packages("ggplot2", repos="https://cloud.r-project.org")'
-Rscript -e 'install.packages("janitor", repos="https://cloud.r-project.org")'
-Rscript -e 'install.packages("dplyr", repos="https://cloud.r-project.org")'
+Rscript -e "install.packages(c('janitor', 'dplyr', 'ggplot2'), repos='https://cran.rstudio.com')"
 
 ```
 

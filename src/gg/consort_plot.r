@@ -7,8 +7,8 @@ library(ggplot2)
 
 # Read in all important datasets from python--------------
 
-    consort_input_df <- read.csv("src/gg/consort_input_df.csv")
-    query_requests <- read.csv("src/gg/query_requests.csv")
+    consort_input_df <- read.csv("data/consort_input_df.csv")
+    query_requests <- read.csv("data/query_requests.csv")
 
 
 #GGPLOT Consort Diagram--------------------------------------------
@@ -67,4 +67,4 @@ geom_rect(xmin = 70, xmax=97, ymin=88-(10*(i-1)), ymax=94-(10*(i-1)), color='bla
   consort_input_df <- consort_input_df[consort_input_df[[exclude_column]] == "Included", ]
 }
   
-ggsave(p, "src/gg/Consort_Plot.png")
+ggsave(p, "data/Consort_Plot.png")
