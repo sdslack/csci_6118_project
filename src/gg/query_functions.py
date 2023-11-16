@@ -3,7 +3,8 @@ import pandas as pd
 
 
 # Create a query function which will change values on the query tracking table
-def output_query_summary(column_name_of_interest, filter_param, value):
+def output_query_summary(column_name_of_interest, filter_param,
+                         value, query_summary_file):
     """Output is a pandas dataframe.
     It describes the chosen parameters for a database search.
 
@@ -19,6 +20,11 @@ def output_query_summary(column_name_of_interest, filter_param, value):
         or "greater than"
     value: The filter value is what we want to test.
         This should match the same datatype as the column_name_of_interest
+    query_out_file: The path to a .csv file containing:
+        A column with all column names from the lanl database
+        A column with Yes/No for if you want to filter by this column
+        A column with the way you want to filter (filter param)
+        A column with the value you want to compare the lanl column value to
 
     Returns
     -------
@@ -27,14 +33,14 @@ def output_query_summary(column_name_of_interest, filter_param, value):
         Updated with the search query modifications through this summary
     """
     try:
-        query = pd.read_csv('data/query_requests.csv')
+        query = pd.read_csv(query_summary_file)
     except NameError:
         print("The query dataframe cannot be found.")
         sys.exit(1)
-    col_name_list = query.Search_Options.tolist()
+    col_name_list = query['Search_Options'].tolist()
     column_name_of_interest_list = [column_name_of_interest]
     if (any(x in column_name_of_interest_list
-            for x in column_name_of_interest_list) == 'False'):
+            for x in col_name_list) is False):
         # Handle the case where no matching columns are found
         raise ValueError("No filter criteria found. Please check query df.")
         sys.exit(1)
@@ -43,7 +49,7 @@ def output_query_summary(column_name_of_interest, filter_param, value):
                           "less than", "greater than"]
     filter_param_list = [filter_param]
     if (any(x in filter_param_valid
-            for x in filter_param_list) == 'False'):
+            for x in filter_param_list) is False):
         raise ValueError("Incorrect input for filter_param")
         sys.exit(1)
     query.loc[query.Search_Options == column_name_of_interest,
@@ -71,19 +77,55 @@ def subset_dataframe_by_names(data, column_names):
         Updated with the search query modifications through this summary
     """
     try:
-        if data.empty() == TRUE:
+        if len(data) < 1:
             print("Dataframe is empty.")
             sys.exit(1)
     except NameError:
         print("The dataframe cannot be found.")
         sys.error(1)
-    column_names_of_interest_list = [column_names]
+    column_names_of_interest_list = column_names
     col_name_list = data.columns.tolist()
-    if (any(x in col_name_list for x in column_name_of_interest_list)):
-        data_subset = data[[column_names]]
-        return data_subset
-    else:
-        # Handle the case where no matching columns are found
-        print("No matching columns found in the DataFrame.")
-        return None
+    data_subset = pd.DataFrame()
+    data_subset['All'] = 1
+    for col in column_names_of_interest_list:
+        if col in col_name_list:
+            data_subset[col] = data[col]
+    # Handle the case where no matching columns are found
+    if len(data_subset.columns) < 2:
+        raise ValueError("No matching columns found in the DataFrame.")
         sys.exit(1)
+    return data_subset
+
+
+def reset_query(data):
+    """Output is a csv file.
+    It describes the chosen parameters for a database search.
+
+    Parameters
+    ----------
+    data_file_name: The path to a .csv file containing LANL data
+    query_summary_file: The path to a .csv file containing:
+        A column with all column names from the lanl database
+        A column with Yes/No for if you want to filter by this column
+        A column with the way you want to filter (filter param)
+        A column with the value you want to compare the lanl column value to
+        All values will be reset to their default values
+
+    Returns
+    -------
+    query_summary_file
+        A .csv file with the default (empty) search query settings
+    """
+    if len(data) < 1:
+        raise ValueError("Dataset not found")
+        sys.exit(1)
+    else:
+        lanl = data
+    query_pre = {
+        'Search_Options': lanl.columns,
+        'Search by this column?':
+            ["No"] * len(lanl.columns),
+        'How do you want to filter?': [None] * len(lanl.columns),
+        'Filter Value': [None] * len(lanl.columns)}
+    query = pd.DataFrame(query_pre)
+    return query
