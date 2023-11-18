@@ -30,6 +30,14 @@ class TestDaysFromInfectionPlot(unittest.TestCase):
             else:
                 self.fail("Expected count not found in the output file.")
                 
+    def test_file_not_found(self):
+        csv_file = 'DNE.csv'
+        output_file = 'DNE_output.csv'
+        
+        with self.assertRaises(FileNotFoundError):
+            count_sequences_by_column(csv_file, 0, output_file)
+    
+    
     def test_plot_creation(self):
         csv_file = '../../test/data/output/dfi_output.csv'
         output_png = '../../docs/lkr_dfi_histogram.png'
