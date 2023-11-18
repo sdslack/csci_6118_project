@@ -13,7 +13,7 @@ class TestDaysFromInfectionPlot(unittest.TestCase):
     def test_basic_functionality(self):
         csv_file = '../../test/data/input/Fake_HIV.csv'
         output_file = '../../test/data/output/dfi_output.csv'
-        
+
         count_sequences_by_column(csv_file, 0, output_file)
 
         self.assertTrue(os.path.isfile(output_file))
@@ -29,15 +29,14 @@ class TestDaysFromInfectionPlot(unittest.TestCase):
                     break
             else:
                 self.fail("Expected count not found in the output file.")
-                
+
     def test_file_not_found(self):
         csv_file = 'DNE.csv'
         output_file = 'DNE_output.csv'
-        
+
         with self.assertRaises(FileNotFoundError):
             count_sequences_by_column(csv_file, 0, output_file)
-    
-    
+
     def test_plot_creation(self):
         csv_file = '../../test/data/output/dfi_output.csv'
         output_png = '../../docs/lkr_dfi_histogram.png'
@@ -45,6 +44,7 @@ class TestDaysFromInfectionPlot(unittest.TestCase):
         plot_histogram_from_csv(csv_file, output_png)
 
         self.assertTrue(os.path.isfile(output_png))
+
 
 if __name__ == '__main__':
     unittest.main()

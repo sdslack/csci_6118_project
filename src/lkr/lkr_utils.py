@@ -28,7 +28,6 @@ def get_args():
     return args
 
 
-
 def count_sequences_by_column(csv_file, column_number, output_file):
     # Create a dictionary to store the counts
     counts = {}
@@ -56,7 +55,7 @@ def count_sequences_by_column(csv_file, column_number, output_file):
         writer.writerow(['Days from Infection', 'Number of Sequences'])
         for days, count in counts.items():
             writer.writerow([days, count])
-            
+
 
 def plot_histogram_from_csv(output_file, output_png):
     # Read the CSV file and extract data
@@ -85,4 +84,3 @@ def plot_histogram_from_csv(output_file, output_png):
     # Save the plot as a PNG file
     plt.savefig(output_png, dpi=300, format='png')
     plt.close()
-
