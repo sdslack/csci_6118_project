@@ -1,31 +1,16 @@
 import sys
-from lkr_utils import count_sequences_by_column, plot_histogram_from_csv
+import lkr_utils
+
+def main():
+    # Use the get_args function to parse command-line arguments
+    args = lkr_utils.get_args()
+
+    # Run count_sequences_by_column and plot_histogram_from_csv
+    lkr_utils.count_sequences_by_column(args.csv_file, args.column_number, args.output_file)
+    lkr_utils.plot_histogram_from_csv(args.output_file, args.output_png)
+
+    print(f"Output CSV file saved to: {args.output_file}")
+    print(f"Output PNG file saved to: {args.output_png}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage:")
-        print("  For counting sequences: python main_script.py count <input_csv_file> <column_number> <output_csv_file>")
-        print("  For plotting histogram: python main_script.py plot <input_csv_file> <output_png_file>")
-        sys.exit(1)
-
-    operation = sys.argv[1]
-
-    if operation == "count" and len(sys.argv) == 5:
-        csv_file = sys.argv[2]
-        column_number = int(sys.argv[3])
-        output_file = sys.argv[4]
-
-        count_sequences_by_column(csv_file, column_number, output_file)
-        print("Analysis complete. Results saved to", output_file)
-
-    elif operation == "plot" and len(sys.argv) == 4:
-        input_csv = sys.argv[2]
-        output_png = sys.argv[3]
-
-        plot_histogram_from_csv(input_csv, output_png)
-        print("Histogram plot saved as", output_png)
-
-    else:
-        print("Invalid usage. Please check the provided arguments.")
-        sys.exit(1)
-
+    main()
