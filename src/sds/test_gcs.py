@@ -28,6 +28,15 @@ def authenticate_implicit_with_adc(project_id="csci6118"):
         print(bucket.name)
     print("Listed all storage buckets.")
 
+    # Try to access data file
+    bucket = storage_client.get_bucket('hiv_seq_db')
+    blob = bucket.get_blob('LANL_HIV1_2023_seq_metadata.csv')
+    partial_data = blob.download_as_text(start=0, end=100)  # this is bytes?
+    print(partial_data)
+
+    # TODO: may need to use Google BigQuery instead to only get columns
+    # desired by the user instead of downloading the whole file
+
 
 if __name__ == '__main__':
     authenticate_implicit_with_adc()
