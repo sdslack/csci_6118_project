@@ -20,6 +20,10 @@ parser.add_argument("--output_file",
                     type=str,
                     help="Path to output CSV file",
                     required=True)
+parser.add_argument("--output_columns",
+                    type=str,
+                    help="Columns to output to queried data file",
+                    default="")
 
 args = parser.parse_args()
 
@@ -46,7 +50,8 @@ def main():
             filters.update(numerical_filters)
 
         # filter the data
-        filtered_data = query.filter_data(data, filters)
+        output_cols = args.output_columns.split(',')
+        filtered_data = query.filter_data(data, filters, output_cols)
 
         if not filtered_data.empty:
             filtered_data.to_csv(args.output_file, index=False)

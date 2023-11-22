@@ -30,7 +30,7 @@ def load_data(file_path):
     Parameters
     ----------
     file_path : str
-                Name of the file to be searched.
+        Name of the file to be searched.
 
     Returns
     -------
@@ -48,17 +48,20 @@ def load_data(file_path):
         return None
 
 
-def filter_data(data, filters):
+def filter_data(data, filters, output_cols):
     """Filter the data based on the provided filters.
 
     Parameters
     ----------
     data : data frame
-                Name of the file to be searched.
+        Name of the file to be searched.
     filters: dict
-                Dictionary of filters.
-                Each label is the name of the column.
-                Each value are the filter criteria.
+        Dictionary of filters.
+        Each label is the name of the column.
+        Each value are the filter criteria.
+    output_cols: list
+        List of columns to output to final df.
+
     Returns
     -------
     filtered_data
@@ -71,7 +74,6 @@ def filter_data(data, filters):
             filtered_data = filtered_data[filtered_data[key].isin(values)]
         # Numerical variable filter
         else: 
-            filtered_data[key] = pd.to_numeric(filtered_data[key], errors = 'coerce')
             for value in values:
                 if '<' in value:
                     filtered_data = filtered_data[
@@ -90,7 +92,14 @@ def filter_data(data, filters):
                 elif '=' in value:
                     filtered_data = filtered_data[filtered_data[key]
                                                   == float(value[1:])]
-    return filtered_data
+
+    # output specific columns if specified
+    if len(output_cols) == 1 and output_cols[0] == '':
+        return filtered_data
+    else:
+        col_names = [col.strip() for col in output_cols]
+        return filtered_data[col_names]
+        
 
 
 def split_arguments(filter_parameter):
@@ -100,6 +109,7 @@ def split_arguments(filter_parameter):
     ----------
     filter_parameter: str
         User input for the filter arguments.
+
     Returns
     -------
     filter_args
@@ -117,6 +127,7 @@ def get_numerical_filters(num_args):
     ----------
     num_args: list
         List of columns to be filtered and their filter criteria.
+
     Returns
     -------
     numerical_filters
@@ -142,6 +153,7 @@ def get_categorical_filters(cat_args):
     ----------
     cat_args: list
         List of columns to be filtered and their filter criteria.
+
     Returns
     -------
     categorical_filters
