@@ -324,6 +324,7 @@ In the jb folder within the source folder, is the query_data.py script that will
 The code will take in four main parameters:
 
 1. --file: Name of file and path to file
+    - Only takes in a csv.
 2. --categorical_filters: Filters for any categorical variables 
     - This is not required.
     - This parameter takes in the input as a string.
@@ -338,18 +339,21 @@ The code will take in four main parameters:
         - a single numerical number --> "col_name:=7"
         - not equal to a certain number --> "col_name: !=7"
     - The code can also take multiple variable filter criteria for each individual variable to filter and must be comma separated --> "col_name:=7,9-15,>20"
-4. --output_file: Name of output file and path to file
+4. --query_output_file: Name of output file and path to file
+    - File is written out as a csv.
 5. --output_columns: Names of the columns that will be outputted to the queried data file.
     - This is not a required field.
     - If not provided, the code will output all of the columns in the data frame.
     - If provided, columns need to be comma separated.
+6. --query_request_file: Name of query request summary and path to file
+    - File is written out as csv.
 
 
 **Example Input**
 This is an example to show ways input can be written. This can be used on the test data file but will come up with nothing and there are a limited number of examples that can be provided with this many filters since the data file is small. 
 ```
 python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv --categorical_filters "Subtype:B,35_A1D && Georegion:North America" --numerical_filters "Sequence Length:1035-2025,<915 && Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv 
---output_columns "Sequence Length, Sequence"
+--output_columns "Sequence Length, Sequence --query_request_file ../../doc/query_summary_request.csv"
 ```
 
 ### **Change Log***
