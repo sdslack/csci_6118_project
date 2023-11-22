@@ -9,4 +9,5 @@ python query_data.py \
     --categorical_filters "Subtype:35_A1D" \
     --numerical_filters "Sequence Length:=915" \
     --output_file ../../docs/filtered_seqlength.csv
+    --output_columns "Sequence Length, Sequence, Name"
     
