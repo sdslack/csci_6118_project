@@ -1,23 +1,4 @@
 """Getting the data based on the input by the user to create plots.
-
-Need to think about:
-- need a function that will return values to plot
-    - what columns they want
-    - what and how many filters they want to filter their data by
-
-Notes:
-=======
-- takes in the filters as an entire string
-    - separate parameters for categorical filters vs numerical filters
-    - if there are multiple variables, they need to be separated with &&
-        ex. --categorical_filter "col1:val1,val2 && col2:val3,val4"
-- for numerical filter, filters can be taken as:
-    - a range ex. "col:0-7" (exclusive)
-    - less than or greater than the field ex. "col<10" or "col>10" (exclusive)
-    - not equal ex. "col!=10"
-    - multiple filters ex. "col:7,<5,9-12"
-- for categorical fields, filters are a list of comma separated names
-    - ex. "col:banana,red,blue"
 """
 
 import argparse
@@ -42,7 +23,7 @@ def load_data(file_path):
         return data
     except FileNotFoundError:
         print("File not found. Please provide a valid file path.")
-        return None
+        sys.exit(1)
     except pd.errors.EmptyDataError:
         print("The provided file is empty.")
         return None
@@ -168,3 +149,31 @@ def get_categorical_filters(cat_args):
         values = [val.strip() for val in values]
         categorical_filters[key] = values
     return categorical_filters
+
+
+def make_query_request_summary(filters, df_columns):
+    """Make a query request summary which is a summary
+    of all variables and their filter criteria.
+
+    Parameters
+    ----------
+    filters: dictionary
+        Dictionary of filters.
+        Each label is the name of the column.
+        Each value are the filter criteria.
+    df_columns: list
+        List of all column names.
+
+    Returns
+    -------
+    query_request_df
+        Data frame of query request summary.
+    """
+    col_names = ['Search_Options',
+                'How do you want to filter?',
+                'Filter Value',
+                'Do you plan to search by this column?']
+    query_request_df = pd.DataFrame(columns = col_names)
+    query_request_df['Search_Options'] = df_columns
+
+    return query_request_summary
