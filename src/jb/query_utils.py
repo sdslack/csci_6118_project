@@ -83,21 +83,27 @@ def filter_data(data, filters, output_cols):
         if key in existing_cols:
             # Categorical variable filter
             if data[key].dtype == 'object':
-                filtered_data = filtered_data[filtered_data[key].isin(values)]
+                for value in values:
+                    if '!=' in value:
+                        filtered_data = filtered_data[filtered_data[key] 
+                                                  != value[2:]]
+                    elif '=' in value:
+                        filtered_data = filtered_data[filtered_data[key] 
+                                                      == value[1:]]
             # Numerical variable filter
             else: 
                 for value in values:
-                    if '<' in value:
+                    if '<=' in value:
                         filtered_data = filtered_data[
-                            filtered_data[key] < float(value[1:])]
-                    elif '>' in value:
+                            filtered_data[key] <= float(value[2:])]
+                    elif '>=' in value:
                         filtered_data = filtered_data[
-                            filtered_data[key] > float(value[1:])]
+                            filtered_data[key] >= float(value[2:])]
                     elif '-' in value:
                         lower, upper = map(float, value.split('-'))
                         filtered_data = filtered_data[
-                            (filtered_data[key] > lower)
-                            & (filtered_data[key] < upper)]
+                            (filtered_data[key] >= lower)
+                            & (filtered_data[key] <= upper)]
                     elif '!=' in value:
                         filtered_data = filtered_data[filtered_data[key]
                                                       != float(value[2:])]
@@ -187,5 +193,17 @@ def make_query_request_summary(filters, df_columns):
                 'Do you plan to search by this column?']
     query_request_df = pd.DataFrame(columns = col_names)
     query_request_df['Search_Options'] = df_columns
+    
+    for col, criteria in filters.items():
+        # make sure user specified column is an actual column 
+        if col in df_columns:
+            variable = query_request_df['Search_Options'] == col
 
-    return query_request_summary
+            # filter criteria split
+            
+            query_request_df.loc[variable, 'How do you want to filter?'] = 
+            query_request_df.loc[variable, 'Filter Value'] =
+            query_request_df.loc[variable, 'Do you plan to search by this column?'] =
+            
+    
+    return query_request_df
