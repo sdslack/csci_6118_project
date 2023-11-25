@@ -1,5 +1,5 @@
 import argparse
-import query_data as query
+import query_utils as query
 
 parser = argparse.ArgumentParser(
     description="Query and display data from a CSV file with filters.",
