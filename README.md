@@ -320,25 +320,25 @@ In the jb folder within the source folder, is the query_data.py script that will
 - For the filter parameters, inputs must be provided in quotations when providing multiple filters.
 - Each individual variable to be filterd must be written with a semicolon in between the name of variable and filter criteria/value like this --> "col_name:value1"
 - If there are multiple variables to be filtered, then each different variable must be separated with a && --> "col_name1:value1 && col_name2:value2"
+- If the variable/column(s) to be filtered are not in the data frame or has been typed incorrectly, the code will query only the columns found in the dataframe and spit out a message indicating which columns where not in the found. 
 
 The code will take in four main parameters:
 
 1. --file: Name of file and path to file
     - Only takes in a csv.
-2. --categorical_filters: Filters for any categorical variables 
-    - This is not required.
-    - This parameter takes in the input as a string.
-    - It can also take multiple filter criteria for each variable to filter but these must be comma separated.
-    - Example of command line input: --categorical_filters "col_name1:value1,value2 && col_name2:value3,value4"
-3. --numerical_filters: Filters for any numerical variables 
+2. --filters: Filters for any variables both categorical and numerical. 
     - This is not a required filter.
     - This parameter also takes in the input as a string. 
-    - Filters can be taken as:
-        - a range (exclusive) --> "col_name:0-7"
-        - an inequality (exclusive) --> "col_name:>7" or "col_name:<7"
-        - a single numerical number --> "col_name:=7"
-        - not equal to a certain number --> "col_name: !=7"
-    - The code can also take multiple variable filter criteria for each individual variable to filter and must be comma separated --> "col_name:=7,9-15,>20"
+    - Both numerical and categorical filters can be taken as:
+        - Numerical: 
+            - a range (inclusive) --> "col_name:0-7"
+            - an inequality (inclusive) --> "col_name:>=7" or "col_name:<=7"
+            - a single numerical number --> "col_name:=7"
+            - not equal to a certain number --> "col_name: !=7"
+        - Categorical: 
+            - single values equal to --> "col_name: =United States"
+            - single values not equal to --> "col_name: !=United States"
+    - The code can also take multiple variable filter criteria for each individual variable to filter and must be comma separated --> "col_name1:=7,9-15,>20 && col_name2:Europe,United States"
 4. --query_output_file: Name of output file and path to file
     - File is written out as a csv.
 5. --output_columns: Names of the columns that will be outputted to the queried data file.
@@ -352,8 +352,8 @@ The code will take in four main parameters:
 **Example Input**
 This is an example to show ways input can be written. This can be used on the test data file but will come up with nothing and there are a limited number of examples that can be provided with this many filters since the data file is small. 
 ```
-python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv --categorical_filters "Subtype:B,35_A1D && Georegion:North America" --numerical_filters "Sequence Length:1035-2025,<915 && Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv 
---output_columns "Sequence Length, Sequence --query_request_file ../../doc/query_summary_request.csv"
+python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv 
+--filters "Subtype:B,35_A1D && Georegion: =North America && Sequence Length:1035-2025,<915 && Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv --output_columns "Sequence Length, Sequence --query_request_file ../../doc/query_summary_request.csv"
 ```
 
 ### **Change Log***
