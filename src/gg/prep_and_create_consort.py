@@ -8,7 +8,6 @@ sys.path.append('src/gg')  # noqa
 import consort_prep_functions as pf
 
 
-
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--query_summary_file',
@@ -38,4 +37,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
