@@ -5,12 +5,15 @@ library(janitor)
 library(dplyr)
 library(ggplot2)
 
+# Write a function to create our consort diagram ------------
+
+consort_plot_function <- function(r_consort_input_file, r_query_summary_file, out_consort_png){
+
 # Read in all important datasets from python--------------
 
-    consort_input_df <- read.csv("data/consort_input_df.csv")
-    query_requests <- read.csv("data/query_requests.csv")
-
-
+consort_input_df <- r_consort_input_file
+query_requests <- r_query_summary_file
+    
 #GGPLOT Consort Diagram--------------------------------------------
 ggplot_setup <- tibble(x= 1:100, y= 1:100)
 
@@ -70,5 +73,6 @@ geom_rect(xmin = 70, xmax=97, ymin=88-(10*(i-1)), ymax=94-(10*(i-1)), color='bla
 }
   
 
+ggsave(out_consort_png, p)
 
-ggsave("data/Consort_Plot.png", p)
+}
