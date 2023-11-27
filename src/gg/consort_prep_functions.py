@@ -41,16 +41,23 @@ def reformat_query_summary(query_summary_file):
     query_df_formatted: A pandas dataset
         Formatted for use in format_consort_input_file
     """
-    query_summary_file = pd.read_csv(query_summary_file)
-    new_rows = []
-    for _, row in query_summary_file.iterrows():
-        values = row['Filter Value'].split(',')
-        for value in values:
-            new_row = row.copy()
-            new_row['Filter Value'] = value
-            new_rows.append(new_row)
-    # Creating a new DataFrame from the list of rows
-    query_df_formatted = pd.DataFrame(new_rows)
+    try:
+        query_summary_file = pd.read_csv(query_summary_file)
+    except (FileNotFoundError, NameError):
+        print("Cannot find " + query_summary_file)
+        sys.exit(1)
+    if len(query_summary_file) > 1:
+        new_rows = []
+        for _, row in query_summary_file.iterrows():
+            values = row['Filter Value'].split(',')
+            for value in values:
+                new_row = row.copy()
+                new_row['Filter Value'] = value
+                new_rows.append(new_row)
+        # Creating a new DataFrame from the list of rows
+        query_df_formatted = pd.DataFrame(new_rows)
+    else:
+        query_df_formatted = pd.DataFrame(query_summary_file)
     return query_df_formatted
 
 
@@ -70,12 +77,18 @@ def subset_dataframe_by_names(data, column_names):
         Subset to include only the columns relevant to a given query
     """
     try:
-        if len(data) < 1:
-            print("Dataframe is empty.")
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError(data + " should be a pandas dataframe")
             sys.exit(1)
     except NameError:
-        print("The dataframe cannot be found.")
+        print(data + " cannot be found.")
         sys.error(1)
+    if len(data) < 1:
+        raise ValueError(data + " is empty.")
+        sys.exit(1)
+    if not isinstance(column_names, list):
+        raise ValueError(column_names, "is not a list")
+        sys.exit(1)
     column_names_of_interest_list = column_names
     col_name_list = data.columns.tolist()
     data_subset = pd.DataFrame()
@@ -104,7 +117,11 @@ def format_consort_input_file(consort_input_df_pre, query_df_formatted):
     consort_input_df: A pandas dataframe with inclusion/exclusion information
     Based on filter requests in query_df_formatted
     """
-    consort_input_df_pre = pd.read_csv(consort_input_df_pre)
+    try:
+        consort_input_df_pre = pd.read_csv(consort_input_df_pre)
+    except (FileNotFoundError, NameError):
+        print(consort_input_df_pre + " not found")
+        sys.exit(1)
 
     # Subset the consort_input_df to only the relevant columns
     request_query_col = set(query_df_formatted['Search_Options'].tolist())
@@ -177,7 +194,29 @@ def run_consort_plot_rcode(consort_input_df,
     out_consort_png is saved at the file path
     It contains a consort diagram with filters specified in query_df_formatted
     """
+    try:
+        if not isinstance(consort_input_df, pd.DataFrame):
+            raise ValueError(consort_input_df + " should be a pandas dataframe")
+            sys.exit(1)
+    except NameError:
+        print(consort_input_df + " cannot be found.")
+        sys.error(1)
+    
+    try:
+        if not isinstance(query_df_formatted, pd.DataFrame):
+            raise ValueError(query_df_formatted + " should be a pandas dataframe")
+            sys.exit(1)
+    except NameError:
+        print(query_df_formatted + " cannot be found.")
+        sys.error(1)
+
+    out_consort_png = str(out_consort_png)
+    if not out_consort_png.endswith(".png"):
+        raise ValueError("File path must end in .png")
+        sys.exit(1)
+
     pandas2ri.activate()
+
     r_consort_input_file = pandas2ri.py2rpy(consort_input_df)
     r_query_summary_file = pandas2ri.py2rpy(query_df_formatted)
 
