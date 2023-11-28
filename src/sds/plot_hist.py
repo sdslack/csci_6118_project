@@ -1,7 +1,8 @@
-"""Queries and plots histogram of column specificed by user input
+"""Plots histogram of column specificed by user input
 
         * get_args - gets command line arguments.
         * run_get_col_all - runs get_col_all from sds_utils
+            TODO: this will be removed
         * main - runs get_args, run_get_col_all, then run_plot_hist
         to write out plot of results.
 
@@ -13,7 +14,6 @@ import sys
 import sds_utils
 
 
-# TODO: need to query by col name, not position
 def get_args():
     """Get command line arguments.
 
@@ -31,11 +31,10 @@ def get_args():
     parser.add_argument('--file-name',
                         type=str,
                         required=True,
-                        help='Name of the data file to read')
-    parser.add_argument('--categ-column',
-                        type=int,
-                        required=True,
-                        help='Number of categorical column to query')
+                        help='Name of the data file to read. Expects ' +
+                        'output from LKR, unique values from queried ' +
+                        'column in first column and counts of those ' +
+                        'values in second column')
     parser.add_argument('--plot-path',
                         type=str,
                         required=True,
@@ -44,8 +43,8 @@ def get_args():
     return args
 
 
-def run_get_col_all(args):
-    """Runs get_col_all and returns results.
+def run_get_counts(args):
+    """Runs get_counts and returns results. Expects output from LKR.
 
     Parameters
     ----------
@@ -66,24 +65,20 @@ def run_get_col_all(args):
     except PermissionError:
         print("Could not open: " + args.file_name)
         sys.exit(1)
-    try:
-        if args.categ_column < 0:
-            raise ValueError
-    except ValueError:
-        print('Column number must be positive.')
-        sys.exit(1)
 
-    result = sds_utils.get_col_all(args.file_name, args.categ_column)
-    return result
+    counts_df = sds_utils.get_counts(args.file_name)
+    return counts_df
 
 
-def run_plot_hist(args, col):
+def run_plot_hist(args, counts_df):
     """Runs plot_hist and writes out plot.
 
     Parameters
     ----------
-    col : list of str
-        List of all values from the requested column
+    args : argparse.Namespace
+        Arguments from command line
+    counts_df : pandas dataframe
+        Dataframe of given CSV file with counts of column values
 
     """
     output_path = args.plot_path
@@ -98,7 +93,7 @@ def run_plot_hist(args, col):
     else:
         f.close()
         os.remove(output_path + '/test.txt')
-    sds_utils.plot_hist(col, output_path)
+    sds_utils.plot_hist(counts_df, output_path)
 
 
 if __name__ == '__main__':
@@ -106,5 +101,5 @@ if __name__ == '__main__':
 
     """
     args = get_args()
-    col = run_get_col_all(args)
-    run_plot_hist(args, col)
+    counts_df = run_get_counts(args)
+    run_plot_hist(args, counts_df)
