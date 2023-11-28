@@ -9,62 +9,49 @@ import sys
 import matplotlib
 matplotlib.use('Agg')  # noqa
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
-def get_col_all(file_name, categ_col):
-    """ Queries the given file and returns all values from
-    the requested column.
+def get_counts(file_name):
+    """Reads the given CSV file into a pandas dataframe. Expects
+    output from LKR.
 
     Parameters
     ----------
     file_name : str
         Name of the file to query
-    categ_col : int
-        Number of the column to query
 
     Returns
     -------
-    result : list of str
-        List of all values from the requested column
+    counts : pandas dataframe
+        Dataframe of given CSV file with counts of column values
     """
-    result = []
-    with open(file_name, 'r') as file:
-        for line in file:
-            line = line.rstrip().split(',')
-            try:
-                line[categ_col]
-            except IndexError:
-                print("Query column out of file range.")
-                sys.exit(1)
-            result.append(line[categ_col])
-    return result
+    counts_df = pd.read_csv(file_name)
+    # TODO: add code to confirm Counts in second column?
+    return counts_df
 
 
-def plot_hist(result_col, output_path):
-    """Plots histogram of values in a file. Writes out as .png.
+def plot_hist(counts_df, output_path):
+    """Plots histogram of given counts.
 
     Parameters
     ----------
-    result_col : list of str
-        List of all values from the requested column
+    counts_df : pandas dataframe
+        Dataframe of given CSV file with counts of column values
     output_path : str
         Path to write output plot to
     """
-    result_col = [val.replace('"', '') for val in result_col]  # remove ""
-    x_label = result_col[0]  # use column name
-    y_label = 'Count'
-    title = 'Histogram of ' + x_label + ' Category Counts'  # use column name
-    result_col.pop(0)  # remove column name
-    data = result_col
 
-    # Check if all values can be converted to numeric
-    if all(val.replace('"', '').isdigit() for val in data):
-        data = [float(val) for val in data]
+    values = counts_df.iloc[:, 0]
+    counts = counts_df.iloc[:, 1]
+
+    x_label = counts_df.columns[0]  # TODO: check assumption with LKR?
+    y_label = 'Counts'
+    title = 'Histogram of ' + x_label + ' Counts'  # use column name
 
     # Make plot
-    data.sort()
     fig, ax = plt.subplots()
-    ax.hist(data)
+    ax.bar(values, counts)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.set_xlabel(x_label)
