@@ -75,6 +75,10 @@ the reach goal. Using a small amount of test data from the Los Alamos HIV
 Sequence Database (included at test/data/LANL_HIV1_2023_seq_metadata.csv),
 the project provides a summary of the available metadata for the sequences.
 
+The project's goal function is described by the following figure:
+
+![ProjectOverview](docs/Overview.png)
+
 # **Installation**
 
 The project source code is written in Python3 but is designed to be
