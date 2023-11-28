@@ -1,5 +1,6 @@
 
 from google.cloud import storage
+from google.cloud import bigquery
 
 
 def authenticate_implicit_with_adc(project_id="csci6118"):
@@ -18,27 +19,38 @@ def authenticate_implicit_with_adc(project_id="csci6118"):
         project_id: The project id of your Google Cloud project.
     """
 
-    # This snippet demonstrates how to list buckets.
     # *NOTE*: Replace the client created below with the client required for
     # your application. Note that the credentials are not specified when
     # constructing the client. Hence, the client library will look for
     # credentials using ADC.
-    storage_client = storage.Client(project=project_id)
-    buckets = storage_client.list_buckets()
-    print("Buckets:")
-    for bucket in buckets:
-        print(bucket.name)
-    print("Listed all storage buckets.")
+    # TODO: need to figure out how to give public access
+    # storage_client = storage.Client(project=project_id)
 
     # Try to access data file
-    bucket = storage_client.get_bucket('hiv_seq_db')
-    blob = bucket.get_blob('LANL_HIV1_2023_seq_metadata.csv')
-    partial_data = blob.download_as_text(start=0, end=100)  # this is bytes?
-    print(partial_data)
+    # bucket = storage_client.get_bucket('hiv_seq_db')
+    # blob = bucket.get_blob('LANL_HIV1_2023_seq_metadata.csv')
+    # partial_data = blob.download_as_text(start=0, end=100)  # this is bytes?
+    # print(partial_data)
 
-    # TODO: may need to use Google BigQuery instead to only get columns
-    # desired by the user instead of downloading the whole file
+    # Try Google BigQuery instead to only get columns desired by the user
+    # instead of downloading the whole file
+    client = bigquery.Client()
+    dataset = 'hiv_test_data'
+    table = 'hiv_test_data_table'
 
+    cols = ['Sequence Length', 'Sequence', 'Name']
+
+    # Construct the query to select specific columns
+    query = f"SELECT {', '.join(cols)} FROM `{project_id}.{dataset}.{table}`"
+
+    # Run the query and get the results
+    query_job = client.query(query)
+
+    # Fetch the results into a pandas DataFrame
+    results = query_job.result().to_dataframe()
+
+    # Display the retrieved data
+    print(results)
 
 if __name__ == '__main__':
     authenticate_implicit_with_adc()
