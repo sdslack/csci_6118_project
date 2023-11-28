@@ -3,6 +3,7 @@
 
 import argparse
 import pandas as pd
+import re
 
 
 def load_data(file_path):
@@ -23,10 +24,10 @@ def load_data(file_path):
         return data
     except FileNotFoundError:
         print("File not found. Please provide a valid file path.")
-        return None
+        raise FileNotFoundError
     except pd.errors.EmptyDataError:
         print("The provided file is empty.")
-        return None
+        raise pd.errors.EmptyDataError
 
 
 def check_column_exists(col_names, df):
@@ -47,13 +48,29 @@ def check_column_exists(col_names, df):
     existing_columns = []
 
     for col_name in col_names:
-        try: 
+        try:
             df[col_name]
             existing_columns.append(col_name)
         except KeyError:
             print(f"The column '{col_name}' is not present in the DataFrame.")
+            raise KeyError
 
     return existing_columns
+
+
+def extract_symbol_and_value(user_input):
+    # Define a regular expression pattern to match symbols and values
+    pattern = re.compile(r'([<>!=]+)\s*([\w.-]+)')
+
+    # Search for matches in the user input
+    match = pattern.search(user_input)
+
+    if match:
+        symbol = match.group(1)
+        value = match.group(2)
+        return symbol, value
+    else:
+        return None, None
 
 
 def filter_data(data, filters, output_cols):
@@ -78,39 +95,51 @@ def filter_data(data, filters, output_cols):
     filtered_data = data
     # check if column is in data
     existing_cols = check_column_exists(filters.keys(), data)
-
     for key, values in filters.items():
         if key in existing_cols:
+            column_masks = []
             # Categorical variable filter
             if data[key].dtype == 'object':
+                not_equals_masks = []
                 for value in values:
                     if '!=' in value:
-                        filtered_data = filtered_data[filtered_data[key] 
-                                                  != value[2:]]
+                        mask = (filtered_data[key] != value[2:])
+                        not_equals_masks.append(mask)
                     elif '=' in value:
-                        filtered_data = filtered_data[filtered_data[key] 
-                                                      == value[1:]]
+                        mask = (filtered_data[key] == value[1:])
+                        column_masks.append(mask)
+                if not_equals_masks:
+                    combined_not_equals_mask = pd.concat(not_equals_masks,
+                                                         axis=1).all(axis=1)
+                    column_masks.append(combined_not_equals_mask)
+
             # Numerical variable filter
-            else: 
+            else:
+                not_equals_masks = []
                 for value in values:
                     if '<=' in value:
-                        filtered_data = filtered_data[
-                            filtered_data[key] <= float(value[2:])]
+                        mask = (filtered_data[key] <= float(value[2:]))
+                        column_masks.append(mask)
                     elif '>=' in value:
-                        filtered_data = filtered_data[
-                            filtered_data[key] >= float(value[2:])]
+                        mask = (filtered_data[key] >= float(value[2:]))
+                        column_masks.append(mask)
                     elif '-' in value:
                         lower, upper = map(float, value.split('-'))
-                        filtered_data = filtered_data[
-                            (filtered_data[key] >= lower)
-                            & (filtered_data[key] <= upper)]
+                        mask = ((filtered_data[key] >= lower) &
+                                (filtered_data[key] <= upper))
+                        column_masks.append(mask)
                     elif '!=' in value:
-                        filtered_data = filtered_data[filtered_data[key]
-                                                      != float(value[2:])]
+                        mask = (filtered_data[key] != float(value[2:]))
+                        not_equals_masks.append(mask)
                     elif '=' in value:
-                        filtered_data = filtered_data[filtered_data[key]
-                                                      == float(value[1:])]
-
+                        mask = (filtered_data[key] == float(value[1:]))
+                        column_masks.append(mask)
+                if not_equals_masks:
+                    combined_not_equals_mask = pd.concat(not_equals_masks,
+                                                         axis=1).all(axis=1)
+                    column_masks.append(combined_not_equals_mask)
+            combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
+            filtered_data = filtered_data[combined_column_mask]
     # output specific columns if specified
     if len(output_cols) == 1 and output_cols[0] == '':
         return filtered_data
@@ -120,7 +149,6 @@ def filter_data(data, filters, output_cols):
         existing_cols = check_column_exists(col_names, data)
 
         return filtered_data[existing_cols]
-        
 
 
 def split_arguments(filter_parameter):
@@ -188,22 +216,19 @@ def make_query_request_summary(filters, df_columns):
         Data frame of query request summary.
     """
     col_names = ['Search_Options',
-                'How do you want to filter?',
-                'Filter Value',
-                'Do you plan to search by this column?']
-    query_request_df = pd.DataFrame(columns = col_names)
+                 'Filter Criteria',
+                 'Do you plan to search by this column?']
+    query_request_df = pd.DataFrame(columns=col_names)
     query_request_df['Search_Options'] = df_columns
-    
+
     for col, criteria in filters.items():
-        # make sure user specified column is an actual column 
+        # make sure user specified column is an actual column
         if col in df_columns:
             variable = query_request_df['Search_Options'] == col
+            # join filters by ;
+            joined_filters = ';'.join(criteria)
+            query_request_df.loc[variable, 'Filter Criteria'] = joined_filters
+            plan_to_search = 'Do you plan to search by this column?'
+            query_request_df.loc[variable, plan_to_search] = 'yes'
 
-            # filter criteria split
-            
-            query_request_df.loc[variable, 'How do you want to filter?'] = 
-            query_request_df.loc[variable, 'Filter Value'] =
-            query_request_df.loc[variable, 'Do you plan to search by this column?'] =
-            
-    
     return query_request_df
