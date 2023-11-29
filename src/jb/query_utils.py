@@ -24,9 +24,10 @@ def load_data(file_path):
         return data
     except FileNotFoundError:
         raise FileNotFoundError("File not found. Please provide a valid file path.")
+        sys.exit(1)
     except pd.errors.EmptyDataError:
         raise pd.errors.EmptyDataError("The provided file is empty.")
-
+        sys.exit(1)
 
 def check_column_exists(col_names, df):
     """Make sure the column exists in the data frame.
@@ -51,6 +52,7 @@ def check_column_exists(col_names, df):
             existing_columns.append(col_name)
         except KeyError:
             raise KeyError(f"The column '{col_name}' is not present in the DataFrame.")
+            sys.exit(1)
 
     return existing_columns
 
