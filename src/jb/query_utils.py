@@ -23,11 +23,9 @@ def load_data(file_path):
         data = pd.read_csv(file_path)
         return data
     except FileNotFoundError:
-        print("File not found. Please provide a valid file path.")
-        raise FileNotFoundError
+        raise FileNotFoundError("File not found. Please provide a valid file path.")
     except pd.errors.EmptyDataError:
-        print("The provided file is empty.")
-        raise pd.errors.EmptyDataError
+        raise pd.errors.EmptyDataError("The provided file is empty.")
 
 
 def check_column_exists(col_names, df):
@@ -52,26 +50,37 @@ def check_column_exists(col_names, df):
             df[col_name]
             existing_columns.append(col_name)
         except KeyError:
-            print(f"The column '{col_name}' is not present in the DataFrame.")
-            raise KeyError
+            raise KeyError(f"The column '{col_name}' is not present in the DataFrame.")
 
     return existing_columns
 
 
 def extract_symbol_and_value(user_input):
-    # Define a regular expression pattern to match symbols and values
-    pattern = re.compile(r'([<>!=]+)\s*([\w.-]+)')
+    """Extract the filter symbol and value, removing extra spacing
+    
+    Parameters
+    ----------
+    user_input : str
+        String of the filter criteria.
 
-    # Search for matches in the user input
-    match = pattern.search(user_input)
+    Returns
+    -------
+    symbol
+        Filter symbol.
+    value
+        Filter value.
+    cleaned_input
+        Cleaned spacing for range values. 
+    """
+    cleaned_input = re.sub(r'\s', '', user_input)
+    match = re.match(r'([><=!]+)([^><=!]+)', cleaned_input)
 
     if match:
         symbol = match.group(1)
         value = match.group(2)
         return symbol, value
     else:
-        return None, None
-
+        return '-', cleaned_input
 
 
 def filter_data(data, filters, output_cols):
@@ -102,37 +111,44 @@ def filter_data(data, filters, output_cols):
             not_equals_masks = []
             if data[key].dtype == 'object':
                 for value in values:
-                    if '!=' in value:
-                        mask = (filtered_data[key] != value[2:])
+                    # remove any extra spacing between symbol and value
+                    symbol, val = extract_symbol_and_value(value)
+                    if symbol == '!=':
+                        mask = (filtered_data[key] != val)
                         not_equals_masks.append(mask)
-                    elif '=' in value:
-                        mask = (filtered_data[key] == value[1:])
+                    elif symbol == '=':
+                        mask = (filtered_data[key] == val)
                         column_masks.append(mask)
             else:
             # Numerical variable filter
                 for value in values:
-                    if '<=' in value:
-                        mask = (filtered_data[key] <= float(value[2:]))
+                    # remove any extra spacing between symbol and value
+                    symbol, val = extract_symbol_and_value(value)
+                    if symbol == '<=':
+                        mask = (filtered_data[key] <= float(val))
                         column_masks.append(mask)
-                    elif '>=' in value:
-                        mask = (filtered_data[key] >= float(value[2:]))
+                    elif symbol == '>=':
+                        mask = (filtered_data[key] >= float(val))
                         column_masks.append(mask)
-                    elif '<' in value:
-                        mask = (filtered_data[key] < float(value[1:]))
+                    elif symbol == '<':
+                        mask = (filtered_data[key] < float(val))
                         column_masks.append(mask)
-                    elif '>' in value:
-                        mask = (filtered_data[key] > float(value[1:]))
+                    elif symbol == '>':
+                        mask = (filtered_data[key] > float(val))
                         column_masks.append(mask)
-                    elif '-' in value:
-                        lower, upper = map(float, value.split('-'))
-                        mask = ((filtered_data[key] >= lower) & (filtered_data[key] <= upper))
+                    elif symbol == '-':
+                        lower, upper = map(float, val.split('-'))
+                        mask = ((filtered_data[key] >= lower) &
+                                (filtered_data[key] <= upper))
                         column_masks.append(mask)
-                    elif '!=' in value:
-                        mask = (filtered_data[key] != float(value[2:]))
+                    elif symbol == '!=':
+                        mask = (filtered_data[key] != float(val))
                         not_equals_masks.append(mask)
-                    elif '=' in value:
-                        mask = (filtered_data[key] == float(value[1:]))
+                    elif symbol == '=':
+                        mask = (filtered_data[key] == float(val))
                         column_masks.append(mask)
+
+         # get filtered data for that column and deal with != last
         if column_masks and not_equals_masks:
             combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
             combined_not_equals_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)

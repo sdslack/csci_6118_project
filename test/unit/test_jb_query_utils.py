@@ -45,7 +45,7 @@ class TestQueryData(unittest.TestCase):
         df = pd.read_csv('../data/input/Fake_HIV.csv')
 
         # simple = categorical filter
-        filters = {'Sequence': ['=a', '=b']}
+        filters = {'Sequence': ['= a', '=b']}
         output_cols = ['Sequence']
         data = {'Sequence': ['a', 'b', 'a', 'b', 'a', 'b',
                              'a', 'b', 'a', 'b', 'a', 'b',
@@ -67,7 +67,7 @@ class TestQueryData(unittest.TestCase):
                            actual_df.reset_index(drop=True))
 
         # simple > and < numerical filter
-        filters = {'Days from Infection': ['<=21', '>=29']}
+        filters = {'Days from Infection': ['<= 21', '>=29']}
         output_cols = ['Days from Infection']
         data = {'Days from Infection': [29, 21, 21, 30, 30, 29, 20,
                                         20, 29, 30, 21, 30, 30, 20, 30]}
@@ -77,7 +77,7 @@ class TestQueryData(unittest.TestCase):
                            actual_df.reset_index(drop=True))
 
         # simple - numerical filter
-        filters = {'Float': ['0.28-0.41']}
+        filters = {'Float': ['0.28 - 0.41']}
         output_cols = ['Float']
         data = {'Float': [0.32, 0.28, 0.39, 0.40, 0.41, 0.28]}
         filtered_df = pd.DataFrame(data)
@@ -106,19 +106,6 @@ class TestQueryData(unittest.TestCase):
         actual_df = query_data.filter_data(df, filters, output_cols)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
-        
-
-        # filters = {'Sequence': ['=b', '!=a'],
-        # 'Float': ['>=0.60', '<=0.20'],
-        # 'Days from Infection': ['24-30', '!=']}
-        # output_cols = ['']
-        # data = {'Days from Infection': [27],
-        #        'Sequence': ['b'],
-        #        'Float': [0.61]}
-        # filtered_df = pd.DataFrame(data)
-        # actual_df = query_data.filter_data(df, filters, output_cols)
-        # assert_frame_equal(filtered_df,
-        #                    actual_df.reset_index(drop=True))
 
         # no matching data to filter
         filters = {'Sequence': ['=q']}
@@ -229,25 +216,61 @@ class TestQueryData(unittest.TestCase):
         filter_args = []
         self.assertEqual(query_data.get_filters(filter_args), {})
 
-    def make_query_request_summary(self):
+    def test_make_query_request_summary(self):
         df = pd.read_csv('../data/input/Fake_HIV.csv')
 
         # simple
         filters = {'Sequence': ['=a']}
         df_cols = df.columns
         data = {'Search_Options': ['Days from Infection', 'Sequence', 'Float'],
-                'Filter Criteria': ['', '=a', ''],
-                'Do you plan to search by this column?': ['', 'yes', '']}
+                'Filter Criteria': [float("NaN"), '=a', float("NaN")],
+                'Do you plan to search by this column?': [float("NaN"), 'yes', float("NaN")]}
         query_request = pd.DataFrame(data)
-        actul_df = query_data.make_query_request_summary(filters, df_cols)
-        self.assertEqual(actual_df, query_request)
+        actual_df = query_data.make_query_request_summary(filters, df_cols)
+        assert_frame_equal(actual_df, query_request)
 
         # complex
         filters = {'Days from Infection': ['<=22', '!=29'],
                    'Sequence': ['=a', '=b']}
-        df_cols = df.columns
         data = {'Search_Options': ['Days from Infection', 'Sequence', 'Float'],
-                'Filter Criteria': ['<=22;!=29', '=a;=b', ''],
-                'Do you plan to search by this column?': ['yes', 'yes', '']}
-        actul_df = query_data.make_query_request_summary(filters, df_cols)
-        self.assertEqual(actual_df, query_request)
+                'Filter Criteria': ['<=22;!=29', '=a;=b', float("NaN")],
+                'Do you plan to search by this column?': ['yes', 'yes', float("NaN")]}
+        query_request = pd.DataFrame(data)
+        actual_df = query_data.make_query_request_summary(filters, df_cols)
+        assert_frame_equal(actual_df, query_request)
+
+    def test_extract_symbol_and_value(self):
+        user_input = '= 5'
+        expected_symbol = '='
+        expected_value = '5'
+        actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
+        self.assertEqual(actual_symbol, expected_symbol)
+        self.assertEqual(actual_value, expected_value)
+        
+        user_input = '!=    5'
+        expected_symbol = '!='
+        expected_value = '5'
+        actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
+        self.assertEqual(actual_symbol, expected_symbol)
+        self.assertEqual(actual_value, expected_value)
+        
+        user_input = '>=    5'
+        expected_symbol = '>='
+        expected_value = '5'
+        actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
+        self.assertEqual(actual_symbol, expected_symbol)
+        self.assertEqual(actual_value, expected_value)
+        
+        user_input = '<=  5'
+        expected_symbol = '<='
+        expected_value = '5'
+        actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
+        self.assertEqual(actual_symbol, expected_symbol)
+        self.assertEqual(actual_value, expected_value)
+        
+        user_input = '10 -   20'
+        expected_symbol = '-'
+        expected_value = '10-20'
+        actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
+        self.assertEqual(actual_symbol, expected_symbol)
+        self.assertEqual(actual_value, expected_value)
