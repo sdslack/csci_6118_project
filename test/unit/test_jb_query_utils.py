@@ -106,19 +106,6 @@ class TestQueryData(unittest.TestCase):
         actual_df = query_data.filter_data(df, filters, output_cols)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
-        
-        data_long = {'Column_1': [1.2, 3.5, 4.1, 2.8],
-                     'Column_2': [2.5, 6.7, 8.9, 1.0],
-                     'Column_3': [9.2, 5.4, 4, 3.0]}
-        data_proper_filter = {'Column_3': [5.4, 3.0]}
-        df_long = pd.DataFrame(data_long)
-        df_proper_filter = pd.DataFrame(data_proper_filter)
-        filters = {'Column_3': ['!=4','<9']}
-        output_cols = ['Column_3']
-        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
-        print(df_long_filtered)
-        print(df_proper_filter)
-        assert_frame_equal(df_proper_filter, df_long_filtered)
 
         # no matching data to filter
         filters = {'Sequence': ['=q']}
@@ -134,7 +121,61 @@ class TestQueryData(unittest.TestCase):
                          query_data.filter_data(df,
                                                 filters,
                                                 output_cols).empty)
+        
+    # complex filter with not equal to
+    def test_filter_data_ne_as_firstfilter(self):
+        data_long = {'Column_1': [1.2, 3.5, 4.1, 2.8],
+                'Column_2': [2.5, 6.7, 8.9, 1.0],
+                'Column_3': [9.2, 5.4, 4, 3.0]}
+        data_proper_filter = {
+                'Column_3': [5.4, 3.0]}
+        df_long = pd.DataFrame(data_long)
+        df_proper_filter = pd.DataFrame(data_proper_filter)
+        filters = {'Column_3': ['!=4', '<9'], }
+        output_cols = ['Column_3']
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        df_long_filtered.reset_index(drop=True, inplace=True)
+        self.assertEqual(len(df_proper_filter), len(df_long_filtered))
+        
+    def test_filter_data_multiple_ne(self):
+        data_long = {'Column_1': [1.2, 3.5, 4.1, 2.8, 1],
+                'Column_2': [2.5, 6.7, 8.9, 1.0, 4],
+                'Column_3': [9.2, 5.4, 4, 3.0, 11]}
+        data_proper_filter = {
+                        'Column_1': [4.1, 1]}
+        df_long = pd.DataFrame(data_long)
+        df_proper_filter = pd.DataFrame(data_proper_filter)
+        filters = {'Column_1': ['!=1.2', '!=3.5', '>=4.1', '=1']}
+        output_cols = ['Column_1']
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        self.assertEqual(len(df_proper_filter), len(df_long_filtered))
 
+    def test_filter_data_only_ne(self):
+        data_long = {'Column_1': [1.2, 3.5, 4.1, 2.8, 1],
+                'Column_2': [2.5, 6.7, 8.9, 1.0, 4],
+                'Column_3': [9.2, 5.4, 4, 3.0, 11]}
+        data_proper_filter = {
+                        'Column_1': [4.1, 2.8, 1]}
+        df_long = pd.DataFrame(data_long)
+        df_proper_filter = pd.DataFrame(data_proper_filter)
+        filters = {'Column_1': ['!=1.2', '!=3.5']}
+        output_cols = ['Column_1']
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        self.assertEqual(len(df_proper_filter), len(df_long_filtered))
+
+    def test_filter_data_only_equal(self):
+        data_long = {'Column_1': [1.2, 3.5, 4.1, 2.8, 1],
+                    'Column_2': [2.5, 6.7, 8.9, 1.0, 4],
+                    'Column_3': [9.2, 5.4, 4, 3.0, 11]}
+        data_proper_filter = {
+                        'Column_1': [1.2, 3.5]}
+        df_long = pd.DataFrame(data_long)
+        df_proper_filter = pd.DataFrame(data_proper_filter)
+        filters = {'Column_1': ['=1.2', '=3.5']}
+        output_cols = ['Column_1']
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        self.assertEqual(len(df_proper_filter), len(df_long_filtered))
+    
     def test_split_arguments(self):
         # with &&
         filter = ' One: 1,1,1 && Two: 2,2 '

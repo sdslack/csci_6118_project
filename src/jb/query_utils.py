@@ -108,9 +108,8 @@ def filter_data(data, filters, output_cols):
     for key, values in filters.items():
         if key in existing_cols:
             column_masks = []
-            # Categorical variable filter
+            not_equals_masks = []
             if data[key].dtype == 'object':
-                not_equals_masks = []
                 for value in values:
                     # remove any extra spacing between symbol and value
                     symbol, val = extract_symbol_and_value(value)
@@ -120,15 +119,8 @@ def filter_data(data, filters, output_cols):
                     elif symbol == '=':
                         mask = (filtered_data[key] == val)
                         column_masks.append(mask)
-                if not_equals_masks:
-                    # combine for multiple != operations 
-                    combined_not_equals_mask = pd.concat(not_equals_masks,
-                                                         axis=1).all(axis=1)
-                    column_masks.append(combined_not_equals_mask)
-
-            # Numerical variable filter
             else:
-                not_equals_masks = []
+            # Numerical variable filter
                 for value in values:
                     # remove any extra spacing between symbol and value
                     symbol, val = extract_symbol_and_value(value)
@@ -155,15 +147,21 @@ def filter_data(data, filters, output_cols):
                     elif symbol == '=':
                         mask = (filtered_data[key] == float(val))
                         column_masks.append(mask)
-                if not_equals_masks:
-                    # combine for multiple != operations 
-                    combined_not_equals_mask = pd.concat(not_equals_masks,
-                                                         axis=1).all(axis=1)
-                    column_masks.append(combined_not_equals_mask)
 
-            # get filtered data for that column 
+         # get filtered data for that column and deal with != last
+        if column_masks and not_equals_masks:
             combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
-            filtered_data = filtered_data[combined_column_mask]
+            combined_not_equals_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
+            summary_mask = pd.concat([combined_column_mask, combined_not_equals_mask],
+                                     axis=1).all(axis=1)
+        elif not_equals_masks:
+            combined_not_equals_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
+            summary_mask = combined_not_equals_mask
+        elif column_masks:
+            combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
+            summary_mask = combined_column_mask
+
+        filtered_data = filtered_data[summary_mask]
     # output specific columns if specified
     if len(output_cols) == 1 and output_cols[0] == '':
         return filtered_data
@@ -173,7 +171,6 @@ def filter_data(data, filters, output_cols):
         existing_cols = check_column_exists(col_names, data)
 
         return filtered_data[existing_cols]
-
 
 def split_arguments(filter_parameter):
     """Split multiple filter arguments by &&.
