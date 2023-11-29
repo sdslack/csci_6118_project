@@ -138,6 +138,12 @@ def filter_data(data, filters, output_cols):
                     elif symbol == '>=':
                         mask = (filtered_data[key] >= float(val))
                         column_masks.append(mask)
+                    elif symbol == '<':
+                        mask = (filtered_data[key] < float(val))
+                        column_masks.append(mask)
+                    elif symbol == '>':
+                        mask = (filtered_data[key] > float(val))
+                        column_masks.append(mask)
                     elif symbol == '-':
                         lower, upper = map(float, val.split('-'))
                         mask = ((filtered_data[key] >= lower) &

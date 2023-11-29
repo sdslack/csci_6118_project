@@ -338,7 +338,7 @@ The code will take in four main parameters:
     - Both numerical and categorical filters can be taken as:
         - Numerical: 
             - a range (inclusive) --> "col_name:0-7"
-            - an inequality (inclusive) --> "col_name:>=7" or "col_name:<=7"
+            - an inequality (inclusive of exclusive) --> "col_name:>=7" or "col_name:<=7" or "col_name:>7" or "col_name:<7"
             - a single numerical number --> "col_name:=7"
             - not equal to a certain number --> "col_name: !=7"
         - Categorical: 

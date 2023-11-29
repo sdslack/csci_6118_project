@@ -106,18 +106,19 @@ class TestQueryData(unittest.TestCase):
         actual_df = query_data.filter_data(df, filters, output_cols)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
-
-        # filters = {'Sequence': ['=b', '!=a'],
-        # 'Float': ['>=0.60', '<=0.20'],
-        # 'Days from Infection': ['24-30', '!=']}
-        # output_cols = ['']
-        # data = {'Days from Infection': [27],
-        #        'Sequence': ['b'],
-        #        'Float': [0.61]}
-        # filtered_df = pd.DataFrame(data)
-        # actual_df = query_data.filter_data(df, filters, output_cols)
-        # assert_frame_equal(filtered_df,
-        #                    actual_df.reset_index(drop=True))
+        
+        data_long = {'Column_1': [1.2, 3.5, 4.1, 2.8],
+                     'Column_2': [2.5, 6.7, 8.9, 1.0],
+                     'Column_3': [9.2, 5.4, 4, 3.0]}
+        data_proper_filter = {'Column_3': [5.4, 3.0]}
+        df_long = pd.DataFrame(data_long)
+        df_proper_filter = pd.DataFrame(data_proper_filter)
+        filters = {'Column_3': ['!=4','<9']}
+        output_cols = ['Column_3']
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        print(df_long_filtered)
+        print(df_proper_filter)
+        assert_frame_equal(df_proper_filter, df_long_filtered)
 
         # no matching data to filter
         filters = {'Sequence': ['=q']}
