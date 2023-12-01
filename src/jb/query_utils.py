@@ -4,6 +4,7 @@
 import argparse
 import pandas as pd
 import re
+import sys
 
 
 def load_data(file_path):
@@ -85,7 +86,7 @@ def extract_symbol_and_value(user_input):
         return '-', cleaned_input
 
 
-def filter_data(data, filters, output_cols):
+def filter_data(data, filters, output_cols, logical_operator):
     """Filter the data based on the provided filters.
 
     Parameters
@@ -150,18 +151,22 @@ def filter_data(data, filters, output_cols):
                         mask = (filtered_data[key] == float(val))
                         column_masks.append(mask)
 
-         # get filtered data for that column and deal with != last
+        # get filtered data for that column and deal with != last
         if column_masks and not_equals_masks:
-            combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
+            if logical_operator == '||':
+                combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
+            elif logical_operator == '&&':
+                combined_column_mask = pd.concat(column_masks, axis=1).all(axis=1)
             combined_not_equals_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
             summary_mask = pd.concat([combined_column_mask, combined_not_equals_mask],
                                      axis=1).all(axis=1)
         elif not_equals_masks:
-            combined_not_equals_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
-            summary_mask = combined_not_equals_mask
+            summary_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
         elif column_masks:
-            combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
-            summary_mask = combined_column_mask
+            if logical_operator == '||':
+                summary_mask = pd.concat(column_masks, axis=1).any(axis=1)
+            elif logical_operator == '&&':
+                summary_mask = pd.concat(column_masks, axis=1).all(axis=1)
 
         filtered_data = filtered_data[summary_mask]
     # output specific columns if specified
@@ -188,7 +193,7 @@ def split_arguments(filter_parameter):
         List of all filter arguments.
     """
     args = filter_parameter.strip()
-    filter_args = args.split('&&')
+    filter_args = args.split(';')
 
     # cleans list for any empty values in case extra && is included
     cleaned_args = [filter.strip() for filter in filter_args if filter]
@@ -255,3 +260,38 @@ def make_query_request_summary(filters, df_columns):
             query_request_df.loc[variable, plan_to_search] = 'yes'
 
     return query_request_df
+
+
+def check_for_logical_operator(filters, operator):
+    """Check to make sure there is a global logical operator
+    especially if there are two or more filter columns.
+
+    Parameters
+    ----------
+    filters: dictionary
+        Dictionary of filters.
+        Each label is the name of the column.
+        Each value are the filter criteria.
+    operator: str
+        Global logical operator 
+
+    Returns
+    -------
+    operator 
+        || or &&.
+    """
+    # multiple column filters
+    if len(filters.keys()) > 1:
+        # default operator if no operator is entered
+        if operator == "":
+            return '||'
+        elif operator == '&&' or operator == '||':
+            return operator
+        else:
+            print(f'Operator {operator} not valid.')
+            sys.exit(1)
+    # return default 
+    else:
+        return '||'
+            
+    

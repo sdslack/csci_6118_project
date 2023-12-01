@@ -51,7 +51,8 @@ class TestQueryData(unittest.TestCase):
                              'a', 'b', 'a', 'b', 'a', 'b',
                              'a', 'b', 'a', 'b', 'a', 'b']}
         filtered_df = pd.DataFrame(data)
-        actual_df = query_data.filter_data(df, filters, output_cols)
+        operator = '||'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
 
@@ -62,7 +63,8 @@ class TestQueryData(unittest.TestCase):
                 'Sequence': ['c', 'a'],
                 'Float': [0.88, 0.54]}
         filtered_df = pd.DataFrame(data)
-        actual_df = query_data.filter_data(df, filters, output_cols)
+        operator = '||'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
 
@@ -72,7 +74,8 @@ class TestQueryData(unittest.TestCase):
         data = {'Days from Infection': [29, 21, 21, 30, 30, 29, 20,
                                         20, 29, 30, 21, 30, 30, 20, 30]}
         filtered_df = pd.DataFrame(data)
-        actual_df = query_data.filter_data(df, filters, output_cols)
+        operator = '||'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
 
@@ -81,17 +84,19 @@ class TestQueryData(unittest.TestCase):
         output_cols = ['Float']
         data = {'Float': [0.32, 0.28, 0.39, 0.40, 0.41, 0.28]}
         filtered_df = pd.DataFrame(data)
-        actual_df = query_data.filter_data(df, filters, output_cols)
+        operator = '||'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
 
-        # simple != filter ******************
+        # simple != filter 
         filters = {'Sequence': ['!=a', '!=b']}
         output_cols = ['Sequence']
         data = {'Sequence': ['c', 'c', 'c', 'c', 'c', 'c', 'c',
                              'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c']}
         filtered_df = pd.DataFrame(data)
-        actual_df = query_data.filter_data(df, filters, output_cols)
+        operator = '||'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
 
@@ -99,13 +104,29 @@ class TestQueryData(unittest.TestCase):
         filters = {'Sequence': ['=b'], 'Float': ['>=0.60'],
                    'Days from Infection': ['24-30']}
         output_cols = ['']
+        logical_operator = '&&'
         data = {'Days from Infection': [27],
                 'Sequence': ['b'],
                 'Float': [0.61]}
         filtered_df = pd.DataFrame(data)
-        actual_df = query_data.filter_data(df, filters, output_cols)
+        operator = '&&'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
         assert_frame_equal(filtered_df,
                            actual_df.reset_index(drop=True))
+        
+        filters = {'Sequence': ['!=b'], 'Float': ['>=0.80'],
+                   'Days from Infection': ['24-30']}
+        output_cols = ['']
+        logical_operator = '&&'
+        data = {'Days from Infection': [29, 25, 30, 24, 30],
+                'Sequence': ['c', 'c', 'c', 'c', 'a'],
+                'Float': [0.99, 0.91, 0.88, 0.81, 0.86]}
+        filtered_df = pd.DataFrame(data)
+        operator = '&&'
+        actual_df = query_data.filter_data(df, filters, output_cols, operator)
+        assert_frame_equal(filtered_df,
+                           actual_df.reset_index(drop=True))
+
 
         # no matching data to filter
         filters = {'Sequence': ['=q']}
@@ -117,10 +138,12 @@ class TestQueryData(unittest.TestCase):
         filtered_df = pd.concat([pd.Series(dtype=column_types[col],
                                            name=col) for col in column_names],
                                 axis=1)
+        operator = '||'
         self.assertEqual(filtered_df.empty,
                          query_data.filter_data(df,
                                                 filters,
-                                                output_cols).empty)
+                                                output_cols,
+                                                operator).empty)
         
     # complex filter with not equal to
     def test_filter_data_ne_as_firstfilter(self):
@@ -133,7 +156,8 @@ class TestQueryData(unittest.TestCase):
         df_proper_filter = pd.DataFrame(data_proper_filter)
         filters = {'Column_3': ['!=4', '<9'], }
         output_cols = ['Column_3']
-        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        operator = '||'
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols, operator)
         df_long_filtered.reset_index(drop=True, inplace=True)
         self.assertEqual(len(df_proper_filter), len(df_long_filtered))
         
@@ -147,7 +171,8 @@ class TestQueryData(unittest.TestCase):
         df_proper_filter = pd.DataFrame(data_proper_filter)
         filters = {'Column_1': ['!=1.2', '!=3.5', '>=4.1', '=1']}
         output_cols = ['Column_1']
-        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        operator = '||'
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols, operator)
         self.assertEqual(len(df_proper_filter), len(df_long_filtered))
 
     def test_filter_data_only_ne(self):
@@ -160,7 +185,8 @@ class TestQueryData(unittest.TestCase):
         df_proper_filter = pd.DataFrame(data_proper_filter)
         filters = {'Column_1': ['!=1.2', '!=3.5']}
         output_cols = ['Column_1']
-        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        operator = '||'
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols, operator)
         self.assertEqual(len(df_proper_filter), len(df_long_filtered))
 
     def test_filter_data_only_equal(self):
@@ -173,17 +199,18 @@ class TestQueryData(unittest.TestCase):
         df_proper_filter = pd.DataFrame(data_proper_filter)
         filters = {'Column_1': ['=1.2', '=3.5']}
         output_cols = ['Column_1']
-        df_long_filtered = query_data.filter_data(df_long, filters, output_cols)
+        operator = '||'
+        df_long_filtered = query_data.filter_data(df_long, filters, output_cols, operator)
         self.assertEqual(len(df_proper_filter), len(df_long_filtered))
     
     def test_split_arguments(self):
         # with &&
-        filter = ' One: 1,1,1 && Two: 2,2 '
+        filter = ' One: 1,1,1; Two: 2,2 '
         self.assertEqual(query_data.split_arguments(filter),
                          ['One: 1,1,1', 'Two: 2,2'])
 
         # with extra delimiter
-        filter = 'One: 1,1,1 && Two: 2,2 &&'
+        filter = 'One: 1,1,1 ;Two: 2,2 ;'
         self.assertEqual(query_data.split_arguments(filter),
                          ['One: 1,1,1', 'Two: 2,2'])
 
@@ -206,7 +233,7 @@ class TestQueryData(unittest.TestCase):
         filter_args = ['Seq: a,b, <10,  !=9,        1-5']
         self.assertEqual(query_data.get_filters(filter_args),
                          {'Seq': ['a', 'b', '<10', '!=9', '1-5']})
-        filter_args = ['Seq: a,b, <10, !=9, 1-5 && Floats : =10.0,']
+        filter_args = ['Seq: a,b, <10, !=9, 1-5 ; Floats : =10.0,']
         cleaned_filter_args = query_data.split_arguments(filter_args[0])
         self.assertEqual(query_data.get_filters(cleaned_filter_args),
                          {'Seq': ['a', 'b', '<10', '!=9', '1-5'],
@@ -274,3 +301,33 @@ class TestQueryData(unittest.TestCase):
         actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
         self.assertEqual(actual_symbol, expected_symbol)
         self.assertEqual(actual_value, expected_value)
+        
+    def test_check_for_logical_operator(self):
+        # return default 
+        filters = {'Sequence': ['=q']}
+        operator = ''
+        actual_operator = query_data.check_for_logical_operator(filters, operator)
+        expected_operator = '||'
+        self.assertEqual(actual_operator, expected_operator)
+        
+        # no operator entered
+        filters = {'Sequence': ['=q'], 'Column_1': ['>10']}
+        operator = ''
+        actual_operator = query_data.check_for_logical_operator(filters, operator)
+        expected_operator = '||'
+        self.assertEqual(actual_operator, expected_operator)
+        
+        # regular operator entered
+        filters = {'Sequence': ['=q'], 'Column_1': ['>10']}
+        operator = '&&'
+        actual_operator = query_data.check_for_logical_operator(filters, operator)
+        expected_operator = '&&'
+        self.assertEqual(actual_operator, expected_operator)
+        
+        # invalid operator 
+        filters = {'Sequence': ['=q'], 'Column_1': ['>10']}
+        operator = '&'
+        with self.assertRaises(SystemExit):
+            query_data.check_for_logical_operator(filters, operator)
+        
+        
