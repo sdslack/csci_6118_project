@@ -324,9 +324,9 @@ In the jb folder within the source folder, is the query_data.py script that will
 
 - For the filter parameters, inputs must be provided in quotations when providing multiple filters.
 - Each individual variable to be filterd must be written with a semicolon in between the name of variable and filter criteria/value like this --> "col_name:value1"
-- If there are multiple variables to be filtered, then each different variable must be separated with a && --> "col_name1:value1 && col_name2:value2"
+- If there are multiple variables to be filtered, then each different variable must be separated with a ; --> "col_name1:value1 ; col_name2:value2"
 - If the variable/column(s) to be filtered are not in the data frame or has been typed incorrectly, the code will query only the columns found in the dataframe and spit out a message indicating which columns where not in the found. 
-- Criteria for each column separated by a comma will be interpreted as OR operations UNLESS there are multiple = or != statements which will be read as AND operations.****** FIX
+- Criteria for each column separated by a comma will be interpreted as OR operations UNLESS there are multiple != statements which will be read as AND operations.
     
 
 The code will take in four main parameters:
@@ -339,14 +339,14 @@ The code will take in four main parameters:
     - Both numerical and categorical filters can be taken as:
         - Numerical: 
             - a range (inclusive) --> "col_name:0-7"
-            - an inequality (inclusive of exclusive) --> "col_name:>=7" or "col_name:<=7" or "col_name:>7" or "col_name:<7"
+            - an inequality (inclusive or exclusive) --> "col_name:>=7" or "col_name:<=7" or "col_name:>7" or "col_name:<7"
             - a single numerical number --> "col_name:=7"
             - not equal to a certain number --> "col_name: !=7"
         - Categorical: 
             - single values equal to --> "col_name: =United States"
             - single values not equal to --> "col_name: !=United States"
-    - The code can also take multiple variable filter criteria for each individual variable to filter and must be separated by a comma --> "col_name1:=7,9-15,>20 && col_name2:Europe,United States"
-    - There needs to be no space between the symbol and values only for range criteria --> "8-10"
+    - The code can also take multiple variable filter criteria for each individual variable to filter and must be separated by a comma --> "col_name1:=7,9-15,>20 ; col_name2:Europe,United States"
+    - Multiple column filters need to be separated by ;
 4. --query_output_file: Name of output file and path to file
     - File is written out as a csv.
 5. --output_columns: Names of the columns that will be outputted to the queried data file.
@@ -355,13 +355,17 @@ The code will take in four main parameters:
     - If provided, columns need to be comma separated.
 6. --query_request_file: Name of query request summary and path to file
     - File is written out as csv.
+7. --global_logical_operator: The logical operator (&& or ||) that is used to describe how to filter between columns.
+    - Takes in either && or ||
+    - Example --> --filter: "col1: =3; col2: <5" --global_logical_operator '&&'
+        - This example will output a filtered dataset where all rows are both =3 in col1 and <5 in col2.
 
 
 **Example Input**
 This is an example to show ways input can be written. This can be used on the test data file but will come up with nothing and there are a limited number of examples that can be provided with this many filters since the data file is small. 
 ```
 python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv 
---filters "Subtype:=B,=35_A1D && Georegion: =North America && Sequence Length:1035-2025,<915 && Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv --output_columns "Sequence Length, Sequence --query_request_file ../../doc/query_summary_request.csv"
+--filters "Subtype:=B,=35_A1D ; Georegion: =North America ; Sequence Length:1035-2025,<915 ; Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv --output_columns "Sequence Length, Sequence" --query_request_file ../../doc/query_summary_request.csv --global_logical_operator "||"
 ```
 
 ### **Change Log***
