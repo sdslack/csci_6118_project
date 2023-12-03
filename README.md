@@ -1,5 +1,9 @@
 # **Overview**
 
+TODO: things to add
+
++ list of all potential column names so user knows options to query/output?
+
 ### **Scientific Background**
 
 The challenge of curing HIV:
