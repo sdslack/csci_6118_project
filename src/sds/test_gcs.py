@@ -1,56 +1,25 @@
 
-from google.cloud import storage
-from google.cloud import bigquery
+from google.oauth2 import service_account
+import pandas as pd
 
+# To note: this script uses a service account private key
+# to gain access to the Google BigQuery dataset. The service
+# account ONLY has access to the BigQuery dataset.
 
-def authenticate_implicit_with_adc(project_id="csci6118"):
+def test_gbq_data(project_id="csci6118"):
+    """Function uses pandas-gbq to get BigQuery data.
+    TODO: need to update to get just specific columns.
     """
-    When interacting with Google Cloud Client libraries, the library can
-    auto-detect the credentials to use.
-
-    // TODO(Developer):
-    //  1. Before running this sample, set up ADC as described in
-    //      https://cloud.google.com/docs/authentication/external/set-up-adc
-    //  2. Replace the project variable.
-    //  3. Make sure that the user account or service account that you are
-    //      using has the required permissions. For this sample, you must
-    //      have "storage.buckets.list".
-    Args:
-        project_id: The project id of your Google Cloud project.
+    credentials = service_account.Credentials.from_service_account_file(
+        '../../etc/csci6118-ee6fa23ab1b7.json')
+    query = """
+    SELECT *
+    FROM csci6118.hiv_test_data.hiv_test_data_table
     """
-
-    # *NOTE*: Replace the client created below with the client required for
-    # your application. Note that the credentials are not specified when
-    # constructing the client. Hence, the client library will look for
-    # credentials using ADC.
-    # TODO: need to figure out how to give public access
-    # storage_client = storage.Client(project=project_id)
-
-    # Try to access data file
-    # bucket = storage_client.get_bucket('hiv_seq_db')
-    # blob = bucket.get_blob('LANL_HIV1_2023_seq_metadata.csv')
-    # partial_data = blob.download_as_text(start=0, end=100)  # this is bytes?
-    # print(partial_data)
-
-    # Try Google BigQuery instead to only get columns desired by the user
-    # instead of downloading the whole file
-    client = bigquery.Client()
-    dataset = 'hiv_test_data'
-    table = 'hiv_test_data_table'
-
-    cols = ['Sequence Length', 'Sequence', 'Name']
-
-    # Construct the query to select specific columns
-    query = f"SELECT {', '.join(cols)} FROM `{project_id}.{dataset}.{table}`"
-
-    # Run the query and get the results
-    query_job = client.query(query)
-
-    # Fetch the results into a pandas DataFrame
-    results = query_job.result().to_dataframe()
-
-    # Display the retrieved data
-    print(results)
+    data = pd.read_gbq(query,
+                     project_id=project_id,
+                     credentials=credentials)
+    print(data)
 
 if __name__ == '__main__':
-    authenticate_implicit_with_adc()
+    test_gbq_data()
