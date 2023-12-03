@@ -57,7 +57,6 @@ def check_column_exists(col_names, df):
 
     return existing_columns
 
-
 def extract_symbol_and_value(user_input):
     """Extract the filter symbol and value, removing extra spacing
     
@@ -75,18 +74,20 @@ def extract_symbol_and_value(user_input):
     cleaned_input
         Cleaned spacing for range values. 
     """
-    cleaned_input = re.sub(r'\s', '', user_input)
+    user_input = str(user_input)
+    cleaned_input = user_input.strip()
     match = re.match(r'([><=!]+)([^><=!]+)', cleaned_input)
 
     if match:
         symbol = match.group(1)
         value = match.group(2)
+        value_cleaned = value.strip()
         return symbol, value
     else:
         return '-', cleaned_input
 
 
-def filter_data(data, filters, output_cols, logical_operator):
+def filter_data(data, filters, output_cols, logical_operator="&&"):
     """Filter the data based on the provided filters.
 
     Parameters
@@ -108,76 +109,88 @@ def filter_data(data, filters, output_cols, logical_operator):
     filtered_data = data
     # check if column is in data
     existing_cols = check_column_exists(filters.keys(), data)
+
+    # Create dictionaries to store masks for each key
+    column_masks = {}
+    not_equals_masks = {}
+    
     for key, values in filters.items():
         if key in existing_cols:
-            column_masks = []
-            not_equals_masks = []
+            if key not in column_masks:
+                column_masks[key] = []
+                not_equals_masks[key] = []
+            
             if data[key].dtype == 'object':
                 for value in values:
-                    # remove any extra spacing between symbol and value
                     symbol, val = extract_symbol_and_value(value)
                     if symbol == '!=':
                         mask = (filtered_data[key] != val)
-                        not_equals_masks.append(mask)
+                        not_equals_masks[key].append(mask)
                     elif symbol == '=':
                         mask = (filtered_data[key] == val)
-                        column_masks.append(mask)
+                        column_masks[key].append(mask)
             else:
-            # Numerical variable filter
                 for value in values:
-                    # remove any extra spacing between symbol and value
                     symbol, val = extract_symbol_and_value(value)
-                    if symbol == '<=':
-                        mask = (filtered_data[key] <= float(val))
-                        column_masks.append(mask)
-                    elif symbol == '>=':
-                        mask = (filtered_data[key] >= float(val))
-                        column_masks.append(mask)
-                    elif symbol == '<':
-                        mask = (filtered_data[key] < float(val))
-                        column_masks.append(mask)
-                    elif symbol == '>':
-                        mask = (filtered_data[key] > float(val))
-                        column_masks.append(mask)
-                    elif symbol == '-':
-                        lower, upper = map(float, val.split('-'))
-                        mask = ((filtered_data[key] >= lower) &
-                                (filtered_data[key] <= upper))
-                        column_masks.append(mask)
-                    elif symbol == '!=':
-                        mask = (filtered_data[key] != float(val))
-                        not_equals_masks.append(mask)
-                    elif symbol == '=':
-                        mask = (filtered_data[key] == float(val))
-                        column_masks.append(mask)
+                    if symbol in ('<=', '>=', '<', '>', '-', '!=', '='):
+                        mask = create_numeric_mask(filtered_data[key], symbol, val)
+                        if symbol == '!=':
+                            not_equals_masks[key].append(mask)
+                        else:
+                            column_masks[key].append(mask)
+    summary_masks = []
+    for key in existing_cols:
+        column_mask_key_combined = []
+        not_equals_mask_key_combined = []
+        key_mask_combined = []
+        if (key in column_masks) and (column_masks[key]):
+            column_mask_key_combined = pd.concat(column_masks[key], axis=1).any(axis=1)
+        if (key in not_equals_masks) and (not_equals_masks[key]):
+            not_equals_mask_key_combined = pd.concat(not_equals_masks[key], axis=1).all(axis=1)
+        if len(column_mask_key_combined)>=1 and len(not_equals_mask_key_combined)>=1:
+            key_mask_combined = pd.concat([not_equals_mask_key_combined, column_mask_key_combined],
+                                          axis=1).all(axis=1)
+        elif len(column_mask_key_combined)>=1:
+            key_mask_combined = column_mask_key_combined
+        elif len(not_equals_mask_key_combined)>=1:
+            key_mask_combined = not_equals_mask_key_combined
 
-        # get filtered data for that column and deal with != last
-        if column_masks and not_equals_masks:
-            if logical_operator == '||':
-                combined_column_mask = pd.concat(column_masks, axis=1).any(axis=1)
-            elif logical_operator == '&&':
-                combined_column_mask = pd.concat(column_masks, axis=1).all(axis=1)
-            combined_not_equals_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
-            summary_mask = pd.concat([combined_column_mask, combined_not_equals_mask],
-                                     axis=1).all(axis=1)
-        elif not_equals_masks:
-            summary_mask = pd.concat(not_equals_masks, axis=1).all(axis=1)
-        elif column_masks:
-            if logical_operator == '||':
-                summary_mask = pd.concat(column_masks, axis=1).any(axis=1)
-            elif logical_operator == '&&':
-                summary_mask = pd.concat(column_masks, axis=1).all(axis=1)
+        summary_masks.append(key_mask_combined)
 
-        filtered_data = filtered_data[summary_mask]
+    # Combine all summary masks into the final mask
+    if summary_masks and logical_operator == '||':
+        final_mask = pd.concat(summary_masks, axis=1).any(axis=1)
+        filtered_data = filtered_data[final_mask]
+    else:
+        final_mask = pd.concat(summary_masks, axis=1).all(axis=1)
+        filtered_data = filtered_data[final_mask]
+    
     # output specific columns if specified
     if len(output_cols) == 1 and output_cols[0] == '':
         return filtered_data
     else:
-        # check that these column names exist
         col_names = [col.strip() for col in output_cols]
         existing_cols = check_column_exists(col_names, data)
-
         return filtered_data[existing_cols]
+
+# Helper function for creating numeric masks
+def create_numeric_mask(column, symbol, value):
+    if symbol == '<=':
+        return (column <= float(value))
+    elif symbol == '>=':
+        return (column >= float(value))
+    elif symbol == '<':
+        return (column < float(value))
+    elif symbol == '>':
+        return (column > float(value))
+    elif symbol == '-':
+        lower, upper = map(float, value.split('-'))
+        return ((column >= lower) & (column <= upper))
+    elif symbol == '!=':
+        return (column != float(value))
+    elif symbol == '=':
+        return (column == float(value))
+
 
 def split_arguments(filter_parameter):
     """Split multiple filter arguments by &&.

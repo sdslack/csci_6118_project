@@ -17,7 +17,8 @@ Sequences can help! Why?
     facing a new mutation in the HIV virus
 + We can understand how differences in the virus
     correspond to differences in clinical outcomes
-TODO: add more here based on what example we choose?
+
+This software is intended as a first step to query investigations, to understand the viras 
 
 The Los Alamos National Laboratory HIV Database contains over 1 million
 HIV genetic sequences along with comprehensive metadata. It is a goverment-
