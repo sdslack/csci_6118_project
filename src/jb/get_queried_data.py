@@ -1,5 +1,6 @@
 import argparse
 import query_utils as query
+
 #### add global && and || between different columns and keep OR operation between multiple filters within a column 
 #### user can only enter only && or only || otherwise there will be an error 
 

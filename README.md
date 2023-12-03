@@ -18,8 +18,6 @@ Sequences can help! Why?
 + We can understand how differences in the virus
     correspond to differences in clinical outcomes
 
-This software is intended as a first step to query investigations, to understand the viras 
-
 The Los Alamos National Laboratory HIV Database contains over 1 million
 HIV genetic sequences along with comprehensive metadata. It is a goverment-
 funded database that is updated biweekly to monthly, and it includes
@@ -28,6 +26,11 @@ health status of the patient infected, year when collected, virus subtype,
 and more. The database can be queried manually at the following link:
 
 https://www.hiv.lanl.gov/components/sequence/HIV/search/search.html
+
+This software is intended as a first step to query investigations,
+to understand the number of viral sequences available based on a particular query.
+While the LANL database is extremely important, bias can also arrive from
+inconsistent or unequal sampling.
 
 ### **Project Rationale**
 
@@ -52,7 +55,6 @@ they are not very reproducible.
 + Understanding of data availability for research questions
 + Understanding of research gaps and need for novel research
 + Removing unwanted biases in data download from large public portals
-    + i.e. database shows multiple results from one person/study
 + Improving reproducibility of searching and data download
 
 **Goal: Understand available data**
@@ -323,7 +325,7 @@ output_path : str
 In the jb folder within the source folder, is the query_data.py script that will execute the main querying functionalities for the data. The code will essentially query an inputted data file based on provided querying filters for the data and then output a csv file of the filtered data. The way filter criteria are inputted must follow the correct format. 
 
 - For the filter parameters, inputs must be provided in quotations when providing multiple filters.
-- Each individual variable to be filterd must be written with a semicolon in between the name of variable and filter criteria/value like this --> "col_name:value1"
+- Each individual variable to be filtered must be written with a semicolon in between the name of variable and filter criteria/value like this --> "col_name:value1"
 - If there are multiple variables to be filtered, then each different variable must be separated with a ; --> "col_name1:value1 ; col_name2:value2"
 - If the variable/column(s) to be filtered are not in the data frame or has been typed incorrectly, the code will query only the columns found in the dataframe and spit out a message indicating which columns where not in the found. 
 - Criteria for each column separated by a comma will be interpreted as OR operations UNLESS there are multiple != statements which will be read as AND operations.
