@@ -87,6 +87,128 @@ def extract_symbol_and_value(user_input):
         return '-', cleaned_input
 
 
+# Helper function for creating numeric masks
+def create_numeric_mask(column, symbol, value):
+    """Return boolean values based on numeric comparison operator
+
+    Parameters
+    ----------
+    column :
+        Column in dataset of interest
+    symbol: 
+        The numeric comparison operator
+        Should be one of the following: <=, >=, <, >, =, !=, -
+    value: float or integer
+        Value to compare using the comparison operator
+
+    Returns
+    -------
+    Boolean values describing if values within a column satisfy a given comparison
+    
+    """
+    if symbol == '<=':
+        return (column <= float(value))
+    elif symbol == '>=':
+        return (column >= float(value))
+    elif symbol == '<':
+        return (column < float(value))
+    elif symbol == '>':
+        return (column > float(value))
+    elif symbol == '-':
+        lower, upper = map(float, value.split('-'))
+        return ((column >= lower) & (column <= upper))
+    elif symbol == '!=':
+        return (column != float(value))
+    elif symbol == '=':
+        return (column == float(value))
+
+def create_by_filter_boolean_filter_summary(filters, data, existing_cols):
+    """Retrieve a dictionary of boolean values based on a single comparison operator
+
+    Parameters
+    ----------
+    filters :
+        A dictionary containing information on how to filter the dataset
+    data: 
+        A pandas dataframe to be filtered
+    existing_cols:
+        A list of columns in the filter dictonary and in the data
+
+    Returns
+    -------
+    Two dictionaries of boolean values based on comparison operator
+    One dictionary contains boolean values only for "!=" operators, if employed
+    One dictionary contains boolean values for all other comparison operators, if employed
+    """
+    # Create dictionaries to store masks for each key
+    column_masks = {}
+    not_equals_masks = {}
+    
+    # Filter each column by requested query
+    for key, values in filters.items():
+        if key in existing_cols:
+            if key not in column_masks:
+                column_masks[key] = []
+                not_equals_masks[key] = []
+            
+            if data[key].dtype == 'object':
+                for value in values:
+                    symbol, val = extract_symbol_and_value(value)
+                    if symbol == '!=':
+                        mask = (data[key] != val)
+                        not_equals_masks[key].append(mask)
+                    elif symbol == '=':
+                        mask = (data[key] == val)
+                        column_masks[key].append(mask)
+            else:
+                for value in values:
+                    symbol, val = extract_symbol_and_value(value)
+                    if symbol in ('<=', '>=', '<', '>', '-', '!=', '='):
+                        mask = create_numeric_mask(data[key], symbol, val)
+                        if symbol == '!=':
+                            not_equals_masks[key].append(mask)
+                        else:
+                            column_masks[key].append(mask)
+    return column_masks, not_equals_masks
+
+def create_by_column_boolean_filter_summary(column_masks, not_equals_masks, key):
+    """Create a list of boolean values
+
+    Parameters
+    ----------
+    column_masks :
+        A dictionary containing information on how the dataset would be filtered
+        for all filter requests for a given column
+        with the following operators: ('<=', '>=', '<', '>', '-', '=')
+    not_equals_masks: 
+        A dictionary containing information on how the dataset would be filtered
+        for all filter requests for a given column
+        with the following operators: '!='
+    key:
+        A column in the dataset being searched
+
+    Returns
+    -------
+    A list of boolean values explaining how a given column in a dataset would be filtered
+    Based on combining all relevant filters for that column
+    """
+    column_mask_key_combined = []
+    not_equals_mask_key_combined = []
+    key_mask_combined = []
+    if (key in column_masks) and (column_masks[key]):
+        column_mask_key_combined = pd.concat(column_masks[key], axis=1).any(axis=1)
+    if (key in not_equals_masks) and (not_equals_masks[key]):
+        not_equals_mask_key_combined = pd.concat(not_equals_masks[key], axis=1).all(axis=1)
+    if len(column_mask_key_combined)>=1 and len(not_equals_mask_key_combined)>=1:
+        key_mask_combined = pd.concat([not_equals_mask_key_combined, column_mask_key_combined],
+                                      axis=1).all(axis=1)
+    elif len(column_mask_key_combined)>=1:
+        key_mask_combined = column_mask_key_combined
+    elif len(not_equals_mask_key_combined)>=1:
+        key_mask_combined = not_equals_mask_key_combined
+    return key_mask_combined
+    
+
 def filter_data(data, filters, output_cols, logical_operator="&&"):
     """Filter the data based on the provided filters.
 
@@ -108,53 +230,13 @@ def filter_data(data, filters, output_cols, logical_operator="&&"):
     """
     filtered_data = data
     # check if column is in data
-    existing_cols = check_column_exists(filters.keys(), data)
+    existing_cols = check_column_exists(filters.keys(), filtered_data)
 
-    # Create dictionaries to store masks for each key
-    column_masks = {}
-    not_equals_masks = {}
-    
-    for key, values in filters.items():
-        if key in existing_cols:
-            if key not in column_masks:
-                column_masks[key] = []
-                not_equals_masks[key] = []
-            
-            if data[key].dtype == 'object':
-                for value in values:
-                    symbol, val = extract_symbol_and_value(value)
-                    if symbol == '!=':
-                        mask = (filtered_data[key] != val)
-                        not_equals_masks[key].append(mask)
-                    elif symbol == '=':
-                        mask = (filtered_data[key] == val)
-                        column_masks[key].append(mask)
-            else:
-                for value in values:
-                    symbol, val = extract_symbol_and_value(value)
-                    if symbol in ('<=', '>=', '<', '>', '-', '!=', '='):
-                        mask = create_numeric_mask(filtered_data[key], symbol, val)
-                        if symbol == '!=':
-                            not_equals_masks[key].append(mask)
-                        else:
-                            column_masks[key].append(mask)
+    column_masks, not_equals_masks = create_by_filter_boolean_filter_summary(filters, filtered_data, existing_cols)
+
     summary_masks = []
     for key in existing_cols:
-        column_mask_key_combined = []
-        not_equals_mask_key_combined = []
-        key_mask_combined = []
-        if (key in column_masks) and (column_masks[key]):
-            column_mask_key_combined = pd.concat(column_masks[key], axis=1).any(axis=1)
-        if (key in not_equals_masks) and (not_equals_masks[key]):
-            not_equals_mask_key_combined = pd.concat(not_equals_masks[key], axis=1).all(axis=1)
-        if len(column_mask_key_combined)>=1 and len(not_equals_mask_key_combined)>=1:
-            key_mask_combined = pd.concat([not_equals_mask_key_combined, column_mask_key_combined],
-                                          axis=1).all(axis=1)
-        elif len(column_mask_key_combined)>=1:
-            key_mask_combined = column_mask_key_combined
-        elif len(not_equals_mask_key_combined)>=1:
-            key_mask_combined = not_equals_mask_key_combined
-
+        key_mask_combined = create_by_column_boolean_filter_summary(column_masks, not_equals_masks, key)
         summary_masks.append(key_mask_combined)
 
     # Combine all summary masks into the final mask
@@ -173,23 +255,42 @@ def filter_data(data, filters, output_cols, logical_operator="&&"):
         existing_cols = check_column_exists(col_names, data)
         return filtered_data[existing_cols]
 
-# Helper function for creating numeric masks
-def create_numeric_mask(column, symbol, value):
-    if symbol == '<=':
-        return (column <= float(value))
-    elif symbol == '>=':
-        return (column >= float(value))
-    elif symbol == '<':
-        return (column < float(value))
-    elif symbol == '>':
-        return (column > float(value))
-    elif symbol == '-':
-        lower, upper = map(float, value.split('-'))
-        return ((column >= lower) & (column <= upper))
-    elif symbol == '!=':
-        return (column != float(value))
-    elif symbol == '=':
-        return (column == float(value))
+
+def make_query_request_summary(filters, df_columns):
+    """Make a query request summary which is a summary
+    of all variables and their filter criteria.
+
+    Parameters
+    ----------
+    filters: dictionary
+        Dictionary of filters.
+        Each label is the name of the column.
+        Each value are the filter criteria.
+    df_columns: list
+        List of all column names.
+
+    Returns
+    -------
+    query_request_df
+        Data frame of query request summary.
+    """
+    col_names = ['Search_Options',
+                 'Filter Criteria',
+                 'Search by this column?']
+    query_request_df = pd.DataFrame(columns=col_names)
+    query_request_df['Search_Options'] = df_columns
+
+    for col, criteria in filters.items():
+        # make sure user specified column is an actual column
+        if col in df_columns:
+            variable = query_request_df['Search_Options'] == col
+            # join filters by ;
+            joined_filters = ';'.join(criteria)
+            query_request_df.loc[variable, 'Filter Criteria'] = joined_filters
+            # Create a column to give a yes/no if searching by this column
+            query_request_df.loc[variable,
+                                 'Search by this column?'] = "Yes"
+    return query_request_df
 
 
 def split_arguments(filter_parameter):
@@ -238,43 +339,6 @@ def get_filters(filter_args):
     return filters
 
 
-def make_query_request_summary(filters, df_columns):
-    """Make a query request summary which is a summary
-    of all variables and their filter criteria.
-
-    Parameters
-    ----------
-    filters: dictionary
-        Dictionary of filters.
-        Each label is the name of the column.
-        Each value are the filter criteria.
-    df_columns: list
-        List of all column names.
-
-    Returns
-    -------
-    query_request_df
-        Data frame of query request summary.
-    """
-    col_names = ['Search_Options',
-                 'Filter Criteria',
-                 'Do you plan to search by this column?']
-    query_request_df = pd.DataFrame(columns=col_names)
-    query_request_df['Search_Options'] = df_columns
-
-    for col, criteria in filters.items():
-        # make sure user specified column is an actual column
-        if col in df_columns:
-            variable = query_request_df['Search_Options'] == col
-            # join filters by ;
-            joined_filters = ';'.join(criteria)
-            query_request_df.loc[variable, 'Filter Criteria'] = joined_filters
-            plan_to_search = 'Do you plan to search by this column?'
-            query_request_df.loc[variable, plan_to_search] = 'yes'
-
-    return query_request_df
-
-
 def check_for_logical_operator(filters, operator):
     """Check to make sure there is a global logical operator
     especially if there are two or more filter columns.
@@ -306,5 +370,3 @@ def check_for_logical_operator(filters, operator):
     # return default 
     else:
         return '||'
-            
-    
