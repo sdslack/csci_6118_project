@@ -18,6 +18,7 @@ names(consort_input_df) <- gsub(" ", "_", names(consort_input_df))
 query_requests <- r_query_summary_df%>%
   mutate(Search_Options = gsub(" ", "_", Search_Options))
 
+
 #GGPLOT Consort Diagram--------------------------------------------
 ggplot_setup <- tibble(x= 1:100, y= 1:100)
 
@@ -37,6 +38,7 @@ for (i in 1:nrow(query_requests)) {
 
     # Include only the relevant columns
     consort_col <- paste0("Filtered_Column_", query_requests$`Search_Options`[i])
+    df_col <- paste0(" ", query_requests$`Search_Options`[i])
   
   #Need to account for when no variation in a column
   value_count_included <- table(consort_input_df[`consort_col`] == TRUE)
@@ -56,7 +58,7 @@ p <- p+
   #Exclusion rectangle
 geom_rect(xmin = 70, xmax=97, ymin=88-(10*(i-1)), ymax=94-(10*(i-1)), color='black',
             fill='white', size=0.25) +
-  annotate('text', x= 83.5, y=91-(10*(i-1)), label= paste0(num_excluded, " excluded for \n", colnames(consort_input_df)[i]), size=2.5)+
+  annotate('text', x= 83.5, y=91-(10*(i-1)), label= paste0(num_excluded, " excluded for \n", df_col), size=2.5)+
   #Inclusion Rectangle
   geom_rect(xmin = 15, xmax=45, ymin=84-(10*(i-1)), ymax=90-(10*(i-1)), color='black',
             fill='white', size=0.25) +
