@@ -69,7 +69,7 @@ def subset_dataframe_by_names(data, column_names):
         sys.exit(1)
     return data_subset
 
-def consort_filter_data(data, filters, output_cols, csv = None):
+def consort_filter_data(data, filters, output_cols, bool_out_csv = None):
     """Filter the data based on the provided filters
     and create input for the consort plot
 
@@ -85,7 +85,7 @@ def consort_filter_data(data, filters, output_cols, csv = None):
         List of columns to output to final df.
     logical operator:
         How to combine filters from multiple columns
-    csv:
+    bool_out_csv:
         Optional.
         If would like a copy of the consort_input_df as a csv,
         Include file path where it should be saved
@@ -118,8 +118,8 @@ def consort_filter_data(data, filters, output_cols, csv = None):
         consort_input_df[column_name] = key_mask_combined
     
     # Give option to write consort_input_df into a csv file
-    if csv is not None:
-        consort_df_file_path = csv
+    if bool_out_csv is not None:
+        consort_df_file_path = bool_out_csv
         consort_input_df.to_csv(consort_df_file_path, index=False)
     
     # Output pandas dataframe for use in R
@@ -189,7 +189,6 @@ def make_query_df_formatted(filters = None, query_summary_file = None,
         sys.exit(1)
     query_df_formatted = query_df_formatted_long[ \
         query_df_formatted_long['Search by this column?'] == 'Yes']
-    print(query_df_formatted)
     return query_df_formatted, filters_provided
 
 
