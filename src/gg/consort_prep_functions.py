@@ -125,7 +125,7 @@ def consort_filter_data(data, filters, output_cols, csv = None):
     # Output pandas dataframe for use in R
     return(consort_input_df)
 
-def query_file_to_summary(query_summary_file):
+def query_file_to_filter(query_summary_file):
     """This function will prepare a user query request file
     For the creation of a consort diagram.
 
@@ -136,27 +136,29 @@ def query_file_to_summary(query_summary_file):
 
     Returns
     -------
-    query_df_formatted: A pandas dataset
-        Formatted for use in format_consort_input_file
+    filters: A dictionary
+        Listing how data should be filtered
     """
     try:
-        query_summary_file = pd.read_csv(query_summary_file)
+        query_summary_file_pd = pd.read_csv(query_summary_file)
     except (FileNotFoundError, NameError):
         print("Cannot find " + query_summary_file)
         sys.exit(1)
-    if len(query_summary_file) > 1:
-        new_rows = []
-        for _, row in query_summary_file.iterrows():
-            values = row['Filter Value'].split(',')
-            for value in values:
-                new_row = row.copy()
-                new_row['Filter Value'] = value
-                new_rows.append(new_row)
-        # Creating a new DataFrame from the list of rows
-        query_df_formatted = pd.DataFrame(new_rows)
-    else:
-        query_df_formatted = pd.DataFrame(query_summary_file)
-    return query_df_formatted
+    query_summary_file_short = query_summary_file_pd[ \
+        query_summary_file_pd['Search by this column?'] == 'Yes']
+    filters = {}
+    for index, row in query_summary_file_short.iterrows():
+        new_filters = {}
+        key_name = query_summary_file_short.loc[index, 'Search_Options']
+        criteria_pre = query_summary_file_short.loc[index, 'Filter Criteria']
+        if isinstance(criteria_pre, str):
+            criteria = criteria_pre.split(';')
+        else:
+            criteria = criteria_pre
+        new_filters = {key_name: criteria}
+        filters.update(new_filters)
+    return filters
+
 
 # Format query summary
 def make_query_df_formatted(filters = None, query_summary_file = None,
@@ -175,15 +177,21 @@ def make_query_df_formatted(filters = None, query_summary_file = None,
             query_df_formatted_long = query.make_query_request_summary(
                 filters_provided, column_names)
     elif query_summary_file != None:
-        query_summary_file = str(query_summary_file)
-        filters_provided = query_file_to_summary(query_summary_file)
-        query_df_formatted_long = query_summary_file
+        # query_summary_file = str(query_summary_file)
+        filters_provided = query_file_to_filter(query_summary_file)
+        try:
+            query_df_formatted_long = pd.read_csv(query_summary_file)
+        except (FileNotFoundError, NameError):
+            print("Cannot find " + query_summary_file)
+            sys.exit(1) 
     else:
         raise ValueError("Must specify either query_summary_file or filters")
         sys.exit(1)
-    query_df_formatted = query_df_formatted_long[
-            query_df_formatted_long['Search by this column?'] == 'Yes']
+    query_df_formatted = query_df_formatted_long[ \
+        query_df_formatted_long['Search by this column?'] == 'Yes']
+    print(query_df_formatted)
     return query_df_formatted, filters_provided
+
 
 # Create a query function which will change values on the query tracking table
 def run_consort_plot_rcode(consort_input_df,
