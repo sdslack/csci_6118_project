@@ -1,4 +1,3 @@
-
 from google.oauth2 import service_account
 import pandas as pd
 
@@ -6,15 +5,17 @@ import pandas as pd
 # to gain access to the Google BigQuery dataset. The service
 # account ONLY has access to the BigQuery dataset.
 
-def test_gbq_data(project_id="csci6118"):
+def get_gbq_data(project_id="csci6118"):
     """Function uses pandas-gbq to get BigQuery data.
-    TODO: need to update to get just specific columns.
     """
+    # --filters "Risk Factor: =Heterosexual, =Sexual Transmission, unspecified" \
+    # --output_columns "SE id(SA), Days from Infection, Risk Factor" \
+
     credentials = service_account.Credentials.from_service_account_file(
         '../../etc/csci6118-ee6fa23ab1b7.json')
     query = """
-    SELECT *
-    FROM csci6118.hiv_test_data.hiv_test_data_table
+    SELECT 'Days from Infection', Subtype
+    FROM csci6118.lanl_hiv_seq_db.results_all
     """
     data = pd.read_gbq(query,
                      project_id=project_id,
@@ -22,4 +23,4 @@ def test_gbq_data(project_id="csci6118"):
     print(data)
 
 if __name__ == '__main__':
-    test_gbq_data()
+    get_gbq_data()
