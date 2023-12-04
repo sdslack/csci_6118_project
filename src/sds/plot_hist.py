@@ -1,10 +1,7 @@
 """Plots histogram of column specificed by user input
 
         * get_args - gets command line arguments.
-        * run_get_col_all - runs get_col_all from sds_utils
-            TODO: this will be removed
-        * main - runs get_args, run_get_col_all, then run_plot_hist
-        to write out plot of results.
+        * main - runs get_args, thenruns run_plot_hist to write out plot of results.
 
 """
 
@@ -35,10 +32,10 @@ def get_args():
                         'output from LKR, unique values from queried ' +
                         'column in first column and counts of those ' +
                         'values in second column')
-    parser.add_argument('--plot-path',
+    parser.add_argument('--plot-prefix',
                         type=str,
                         required=True,
-                        help='Path to write output plot to')
+                        help='Path and prefix for output plot')
     args = parser.parse_args()
     return args
 
@@ -81,9 +78,9 @@ def run_plot_hist(args, counts_df):
         Dataframe of given CSV file with counts of column values
 
     """
-    output_path = args.plot_path
+    output_prefix = args.plot_prefix
     try:
-        f = open(output_path + '/test.txt', 'w')
+        f = open(output_prefix + '_test.txt', 'w')
     except FileNotFoundError:
         print("Output path not found: " + output_path)
         sys.exit(1)
@@ -92,8 +89,8 @@ def run_plot_hist(args, counts_df):
         sys.exit(1)
     else:
         f.close()
-        os.remove(output_path + '/test.txt')
-    sds_utils.plot_hist(counts_df, output_path)
+        os.remove(output_prefix + '_test.txt')
+    sds_utils.plot_hist(counts_df, output_prefix)
 
 
 if __name__ == '__main__':

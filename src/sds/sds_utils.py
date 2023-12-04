@@ -1,6 +1,6 @@
 """SDS functions for query and plot
 
-    * get_col_all - returns the values from a given column in a file
+    * get_counts - reads counts output from LKR into dataframe
     * plot_hist - plots a histogram of values passed in
 
 """
@@ -31,7 +31,7 @@ def get_counts(file_name):
     return counts_df
 
 
-def plot_hist(counts_df, output_path):
+def plot_hist(counts_df, output_prefix):
     """Plots histogram of given counts.
 
     Parameters
@@ -45,7 +45,7 @@ def plot_hist(counts_df, output_path):
     values = counts_df.iloc[:, 0]
     counts = counts_df.iloc[:, 1]
 
-    x_label = counts_df.columns[0]  # TODO: check assumption with LKR?
+    x_label = counts_df.columns[0]
     y_label = 'Counts'
     title = 'Histogram of ' + x_label + ' Counts'  # use column name
 
@@ -61,6 +61,7 @@ def plot_hist(counts_df, output_path):
     # Rotate x-axis labels
     plt.xticks(rotation=45)
 
-    file_name = x_label + '_hist.png'  # use column name
+    x_label = x_label.replace(" ", "_")
+    output = output_prefix + '_' + x_label + '_hist.png'  # use column name
 
-    plt.savefig(output_path + '/' + file_name, bbox_inches='tight')
+    plt.savefig(output, bbox_inches='tight')
