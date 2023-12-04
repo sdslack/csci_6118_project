@@ -14,12 +14,15 @@
     # global AND
 
 # Start with Search 1 only
-    # Risk Factor:=IV Drug User; 
-python3 jb/get_queried_data.py \
+    # TODO: need to swap in Days from Infection:0-90 once figure
+    # out how to handle different types in column
+    # TODO: once query code solved, incorporate BigQuery!
+    # "Sampling Year:1950-2023;Risk Factor:=IV Drug User"
+python jb/get_queried_data.py \
     --file ../test/data/results_1_250000.csv \
-    --filters "Days from Infection:0-90" \
+    --filters "Risk Factor: =Heterosexual, =Sexual Transmission, unspecified" \
     --query_output_file ../docs/filtered_seqlength.csv \
-    --output_columns "SE id(SA), Days from Infection" \
+    --output_columns "SE id(SA), Days from Infection, Risk Factor" \
     --query_request_file ../docs/query_request_summary.csv \
     --global_logical_operator "&&"
     
