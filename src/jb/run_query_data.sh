@@ -11,5 +11,3 @@ python get_queried_data.py \
     --output_columns "Sequence Length, Sequence, Name" \
     --query_request_file ../../docs/query_request_summary.csv \
     --global_logical_operator "||"
-    
-    
