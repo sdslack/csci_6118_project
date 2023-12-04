@@ -1,5 +1,8 @@
 import argparse
 import query_utils as query
+import sys
+sys.path.insert(0, 'sds')  # noqa
+import gbq_utils as gbq_utils
 
 #### add global && and || between different columns and keep OR operation between multiple filters within a column 
 #### user can only enter only && or only || otherwise there will be an error 
@@ -36,8 +39,8 @@ args = parser.parse_args()
 
 
 def main():
-
-    data = query.load_data(args.file)
+    # Get only columns of interest using Google BigQuery
+    data = gbq_utils.get_gbq_data(args.filters, args.output_columns)
 
     if data is not None:
         # if there are any filters
