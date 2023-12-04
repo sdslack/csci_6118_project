@@ -6,6 +6,7 @@ import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 import os
 sys.path.append('src/jb')  # noqa
+sys.path.insert(0, 'jb')  # noqa
 import query_utils as query
 
 
