@@ -9,7 +9,6 @@ import consort_prep_functions as pf
 sys.path.append('../jb')  # noqa
 import query_utils as query
 
-
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--consort_input_file_path',
