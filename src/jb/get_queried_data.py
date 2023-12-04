@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, 'sds')  # noqa
 sys.path.insert(0, '../sds')  # noqa
 import gbq_utils as gbq_utils
+import pandas as pd
 
 #### add global && and || between different columns and keep OR operation between multiple filters within a column 
 #### user can only enter only && or only || otherwise there will be an error 
@@ -27,6 +28,11 @@ parser.add_argument("--query_output_file",
                     type=str,
                     help="Path to output CSV file",
                     required=True)
+parser.add_argument("--query_cols_all_data_file",
+                    type=str,
+                    help="Path to output CSV file with all values from " +
+                    "the queried and requested columns, before filtering",
+                    required=False)
 parser.add_argument("--output_columns",
                     type=str,
                     help="Columns to output to queried data file",
@@ -51,6 +57,11 @@ def main():
     else:
         # Get only columns of interest using Google BigQuery
         data = gbq_utils.get_gbq_data(args.filters, args.output_columns)
+    
+    if args.query_cols_all_data_file is not None:
+        data.to_csv(args.query_cols_all_data_file, index=False)
+        print(f"All data for queried and requested columns saved to " +
+              f"{args.query_cols_all_data_file}")
 
     if data is not None:
         # if there are any filters
