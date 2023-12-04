@@ -2,18 +2,23 @@ import argparse
 import query_utils as query
 import sys
 sys.path.insert(0, 'sds')  # noqa
+sys.path.insert(0, '../sds')  # noqa
 import gbq_utils as gbq_utils
 
 #### add global && and || between different columns and keep OR operation between multiple filters within a column 
 #### user can only enter only && or only || otherwise there will be an error 
 
 parser = argparse.ArgumentParser(
-    description="Query and display data from a CSV file with filters.",
-    prog="Project")
+    description="Query and display data with filters. Automatically " +
+                "queries full dataset stored on Google BigQuery. Use " +
+                "optional --file argument with path to CSV file if " +
+                "want to query local file instead.",
+    prog="get_queried_data.py")
 parser.add_argument("--file",
                     type=str,
-                    help="Path to the CSV data file",
-                    required=True)
+                    help="Optional path to CSV data file, if not given " +
+                    "will query full data on Google BigQuery",
+                    required=False)
 parser.add_argument("--filters",
                     type=str,
                     help="Filter criteria for variables",
@@ -39,8 +44,13 @@ args = parser.parse_args()
 
 
 def main():
-    # Get only columns of interest using Google BigQuery
-    data = gbq_utils.get_gbq_data(args.filters, args.output_columns)
+    # Check if getting full data from Google BigQuery or if local
+    # path to CSV was given
+    if args.file is not None:
+        data = query.load_data(args.file)
+    else:
+        # Get only columns of interest using Google BigQuery
+        data = gbq_utils.get_gbq_data(args.filters, args.output_columns)
 
     if data is not None:
         # if there are any filters
