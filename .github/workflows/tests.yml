@@ -22,3 +22,32 @@ jobs:
                environment-name: csci6118
          - run: |
             find . -name "*.py" -print0 | xargs -0 pycodestyle
+            
+            
+    run_unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: environment.yml
+          environment-name: csci6118
+      - run: |
+          cd test/unit
+          python test_lkr_utils.py
+           
+
+  run_func_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}  
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: environment.yml
+          environment-name: csci6118
+      - run: |
+            cd test/func
+            bash test_days_from_infection_plot.sh 

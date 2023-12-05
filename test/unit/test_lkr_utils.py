@@ -5,7 +5,6 @@ import os
 import csv
 sys.path.insert(0, '../../src/lkr')  # noqa
 from lkr_utils import count_sequences_by_column
-from lkr_utils import plot_histogram_from_csv
 
 
 class TestDaysFromInfectionPlot(unittest.TestCase):
