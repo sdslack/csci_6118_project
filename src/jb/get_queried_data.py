@@ -3,6 +3,7 @@ import query_utils as query
 import sys
 sys.path.insert(0, 'sds')  # noqa
 sys.path.insert(0, '../sds')  # noqa
+sys.path.insert(0, '../src/sds')  # noqa
 import gbq_utils as gbq_utils
 import pandas as pd
 

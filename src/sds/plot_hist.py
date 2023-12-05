@@ -32,10 +32,10 @@ def get_args():
                         'output from LKR, unique values from queried ' +
                         'column in first column and counts of those ' +
                         'values in second column')
-    parser.add_argument('--plot-prefix',
+    parser.add_argument('--plot-output',
                         type=str,
                         required=True,
-                        help='Path and prefix for output plot')
+                        help='Path to write output plot to')
     args = parser.parse_args()
     return args
 
@@ -78,19 +78,19 @@ def run_plot_hist(args, counts_df):
         Dataframe of given CSV file with counts of column values
 
     """
-    output_prefix = args.plot_prefix
+    output = args.plot_output
     try:
-        f = open(output_prefix + '_test.txt', 'w')
+        f = open(output, 'w')
     except FileNotFoundError:
-        print("Output path not found: " + output_path)
+        print("Output path not found: " + output)
         sys.exit(1)
     except PermissionError:
-        print("No permissions for output path: " + output_path)
+        print("No permissions for output path: " + output)
         sys.exit(1)
     else:
         f.close()
-        os.remove(output_prefix + '_test.txt')
-    sds_utils.plot_hist(counts_df, output_prefix)
+        os.remove(output)
+    sds_utils.plot_hist(counts_df, output)
 
 
 if __name__ == '__main__':

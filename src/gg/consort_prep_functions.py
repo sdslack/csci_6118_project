@@ -5,8 +5,10 @@ import re
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 import os
+sys.path.append('../src/jb')  # noqa
 sys.path.append('src/jb')  # noqa
 sys.path.insert(0, 'jb')  # noqa
+sys.path.insert(0, '../src/gg')  # noqa
 sys.path.insert(0, 'gg')  # noqa
 import query_utils as query
 
@@ -243,8 +245,18 @@ def run_consort_plot_rcode(consort_input_df,
     r_query_summary_file = pandas2ri.py2rpy(query_df_formatted)
 
     # Read the content of the R script
-    with open('gg/consort_plot.r', 'r') as file:
-        r_code = file.read()
+    if os.path.exists('consort_plot.r'):
+        with open('consort_plot.r', 'r') as file:
+            r_code = file.read()
+    elif os.path.exists('gg/consort_plot.r'):
+        with open('gg/consort_plot.r', 'r') as file:
+            r_code = file.read()
+    elif os.path.exists('src/gg/consort_plot.r'):
+        with open('src/gg/consort_plot.r', 'r') as file:
+            r_code = file.read()
+    else:
+        with open('../src/gg/consort_plot.r', 'r') as file:
+            r_code = file.read()
     # Execute r code
     robjects.r(r_code)
     # Call the function
