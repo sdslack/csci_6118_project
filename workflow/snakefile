@@ -1,22 +1,53 @@
 # TO NOTE: User define query(ies) between here and dashed line:
 # Set up days from infection filter
 num_list = "=0" + "".join(f",={i}" for i in range(1, 91))
+
 # Define QUERIES dictionary
 QUERIES = {
     'query_1': f"Days from Infection:{num_list}; Risk Factor:=IV Drug User",
     'query_2': f"Days from Infection:{num_list}; Risk Factor:=Male Sex with Male, =Sex worker, =Heterosexual"
 }
+
 # Extracting file names from QUERIES
 # col_names = []
 # for query in QUERIES:
 #     col_name = query.split(':')[0]
 #     col_names.append(col_name)
+
 # -----------------------------------------------------------------------------------------
 rule all:
     input:
-        expand("../docs_snakemake/{query}_request_summary.csv", query=list(QUERIES.keys()))
-        # "../docs_snakemake/query_1_request_summary.csv"
-        # expand("docs_snakemake/{query}.csv", query = QUERIES)
+        expand("../docs_snakemake/{query}_days_from_inf_counts.csv", query=list(QUERIES.keys()))
+        # expand("../docs_snakemake/{query}_consort_plot.png", query=list(QUERIES.keys()))
+        # expand("../docs_snakemake/{query}_request_summary.csv", query=list(QUERIES.keys()))
+
+rule make_csv_counts:
+    input:
+        '../docs_snakemake/{query}_filtered_data.csv',
+    output:
+        '../docs_snakemake/{query}_days_from_inf_counts.csv'
+    shell:
+        "python ../src/lkr/days_from_infection_plot.py " \
+        + "--csv_file '{input}' " \
+        + "--column_name 'Days from Infection' " \
+        + "--output_file '{output}' "
+
+
+rule make_consort:
+    input:
+        all_data = "../docs_snakemake/{query}_all_data.csv",
+        req_summ = "../docs_snakemake/{query}_request_summary.csv"
+
+    output:
+        cons_plot = "../docs_snakemake/{query}_consort_plot.png",
+        cons_input = "../docs_snakemake/{query}_filtered_consort_input.csv"
+    shell:
+        "python3 ../src/gg/create_consort.py " \
+        + "--consort_input_file_path '{input.all_data}' " \
+        + "--query_summary_file '{input.req_summ}' " \
+        + "--out_consort_png '{output.cons_plot}' " \
+        + "--bool_out_csv '{output.cons_input}'"
+
 rule run_query:
     output:
         filt_data = "../docs_snakemake/{query}_filtered_data.csv",
