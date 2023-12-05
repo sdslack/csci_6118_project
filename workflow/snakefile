@@ -9,15 +9,22 @@ QUERIES = {
 }
 
 # Extracting file names from QUERIES
-# col_names = []
-# for query in QUERIES:
-#     col_name = query.split(':')[0]
-#     col_names.append(col_name)
+col_names = []
+for key, val in QUERIES.items():
+    for col in val.split(';'):
+        col_name = col.split(':')[0]
+        col_names.append(col_name)
+
+filenames = [
+    f"../docs_snakemake/{{query}}_{col_name}_counts.csv"
+    for col_name in col_names
+]
 
 # -----------------------------------------------------------------------------------------
 rule all:
     input:
-        expand("../docs_snakemake/{query}_days_from_inf_counts.csv", query=list(QUERIES.keys()))
+        expand(filenames, query=list(QUERIES.keys()))
+        # expand("../docs_snakemake/{query}_days_from_inf_counts.csv", query=list(QUERIES.keys()))
         # expand("../docs_snakemake/{query}_consort_plot.png", query=list(QUERIES.keys()))
         # expand("../docs_snakemake/{query}_request_summary.csv", query=list(QUERIES.keys()))
 
@@ -25,11 +32,11 @@ rule make_csv_counts:
     input:
         '../docs_snakemake/{query}_filtered_data.csv',
     output:
-        '../docs_snakemake/{query}_days_from_inf_counts.csv'
+        '../docs_snakemake/{query}_{col_name}_counts.csv'
     shell:
         "python ../src/lkr/days_from_infection_plot.py " \
         + "--csv_file '{input}' " \
-        + "--column_name 'Days from Infection' " \
+        + "--column_name '{col_name}' " \
         + "--output_file '{output}' "
 
 
