@@ -31,7 +31,7 @@ def get_counts(file_name):
     return counts_df
 
 
-def plot_hist(counts_df, output_prefix):
+def plot_hist(counts_df, output):
     """Plots histogram of given counts.
 
     Parameters
@@ -62,6 +62,6 @@ def plot_hist(counts_df, output_prefix):
     plt.xticks(rotation=45)
 
     x_label = x_label.replace(" ", "_")
-    output = output_prefix + '_' + x_label + '_hist.png'  # use column name
+    # output = output_prefix + '_' + x_label + '_hist.png'  # use column name
 
     plt.savefig(output, bbox_inches='tight')
