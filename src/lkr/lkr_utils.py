@@ -1,6 +1,7 @@
 import csv
 import argparse
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def get_args():
@@ -14,24 +15,19 @@ def get_args():
     - `--csv_file` (str, required): Name of the CSV file.
     - `--column_name` (str, required): Name of the column for histogram plot.
     - `--output_file` (str, required): Name of the output file.
-    - `--output_png` (str, optional): Name of PNG file for histogram plot.
 
     """
     parser = argparse.ArgumentParser(
         description='Pull specified data from a CSV file and generate a histogram plot.',
         prog='lkr_utils'
     )
-    parser.add_argument('--csv_file', type=str, help='CSV file name', required=True)
-    parser.add_argument('--column_name', type=str, help='Column name for histogram', required=True)
-    parser.add_argument('--output_file', type=str, help='Output file name', required=True)
-    parser.add_argument('--output_png', type=str, help='PNG file for histogram', required=False)
+    parser.add_argument('--csv_file', type=str, help='CSV file name', required=False)
+    parser.add_argument('--column_name', type=str, help='Column name for histogram', required=False)
+    parser.add_argument('--output_file', type=str, help='Output file name', required=False)
 
     args = parser.parse_args()
     return args
 
-
-
-import csv
 
 def count_sequences_by_column(csv_file, column_name, output_file):
     """
@@ -69,3 +65,5 @@ def count_sequences_by_column(csv_file, column_name, output_file):
         writer.writerow([column_name, 'Counts'])
         for value, count in counts.items():
             writer.writerow([value, count])
+            
+
