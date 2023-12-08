@@ -3,12 +3,7 @@
 Sarah still TODO:
 + fix snakemake output!
     + replace bash output with snakemake output once fixed!
-+ add new Overview image to docs/ folder
-+ test ENV file works to run everything
-+ not sure what category of dependencies to put these in?
-  - ca-certificates
-  - certifi
-  - openssl
+    + fix manual addition of Days from Infection, Risk Factor?
 + need to finish google big query tests
 
 Other group TODOs:
@@ -99,7 +94,7 @@ as additional files summarizing query, query results, and sequence IDs.
 
 The project's overall goal function is described by the following figure:
 
-![ProjectOverview](docs/Overview.png)
+![ProjectOverview](docs/overview.png)
 
 # **Installation**
 
@@ -166,6 +161,14 @@ You can install these with the following code within the terminal:
 ## TODO: remove this too?
 ```bash
 conda install snakemake graphviz
+```
+
+Finally, there are additional dependencies that need to be installed
+using conda:
+## TODO: remove this too?
+```bash
+conda install ca-certificates certifi openssl
+
 ```
 
 ### **Step by Step Installation Instructions**
