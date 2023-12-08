@@ -1,7 +1,8 @@
 """Plots histogram of column specificed by user input
 
         * get_args - gets command line arguments.
-        * main - runs get_args, thenruns run_plot_hist to write out plot of results.
+        * main - runs get_args, run_get_counts, then run_plot_hist to write
+            out plot of results.
 
 """
 
@@ -21,17 +22,18 @@ def get_args():
 
     """
     parser = argparse.ArgumentParser(
-        description=('Queries and plots histogram of values from ' +
-                     'any column from the input data.'),
-        prog='query_categ_plot'
+        description=('Uses counts of values from query column to plot ' +
+                     'histogram showing distribution of those values.'),
+        prog='plot_hist'
     )
     parser.add_argument('--file-name',
                         type=str,
                         required=True,
                         help='Name of the data file to read. Expects ' +
-                        'output from LKR, unique values from queried ' +
-                        'column in first column and counts of those ' +
-                        'values in second column')
+                        'counts of values from query column as output ' +
+                        'by LKR, with unique values from queried column ' +
+                        'in first column and counts of those values in' +
+                        'second column')
     parser.add_argument('--plot-output',
                         type=str,
                         required=True,
@@ -94,7 +96,7 @@ def run_plot_hist(args, counts_df):
 
 
 if __name__ == '__main__':
-    """Runs get_args, run_get_col_all, and run_plot_hist.
+    """Runs get_args, run_get_counts, and run_plot_hist.
 
     """
     args = get_args()

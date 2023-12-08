@@ -1,8 +1,18 @@
 # **Overview**
 
-TODO: things to add
+Sarah still TODO:
++ fix snakemake output!
+    + replace bash output with snakemake output once fixed!
++ add new Overview image to docs/ folder
++ test ENV file works to run everything
++ not sure what category of dependencies to put these in?
+  - ca-certificates
+  - certifi
+  - openssl
++ need to finish google big query tests
 
-+ list of all potential column names so user knows options to query/output?
+Other group TODOs:
++ listed a few throughout, always starting with TODO!
 
 ### **Scientific Background**
 
@@ -69,60 +79,94 @@ Develop a codebase to summarize data from the HIV database:
 + Allow for better selection of sequences for download
 + Improve understanding of how query choices narrow available data
 
-TODO: add example plots here?
+Example consort plot of how query selections filtered data:
+
+![ConsortPlot](docs_snakemake/query_2_consort_plot.png)
+
+Example distribution of values in query filters:
+
+![QueryDistDaysFromInf](docs_snakemake/query_2_Days_from_Infection_hist.png)
+
+![QueryDistRiskFactor](query_2_Risk_Factor_hist.png)
 
 **Reach Goal: Automate visualization and searching**
 
-TODO: add graphic from pitch slides?
+Automation that allows user to select filtering criteria and receive
+all outputs of the codebase - consort and distribution plots, as well
+as additional files summarizing query, query results, and sequence IDs.
 
 ### **Project Function**
 
-Currently, the project is implements the first goal stated above but not
-the reach goal. Using a small amount of test data from the Los Alamos HIV
-Sequence Database (included at test/data/LANL_HIV1_2023_seq_metadata.csv),
-the project provides a summary of the available metadata for the sequences.
-
-The project's goal function is described by the following figure:
+The project's overall goal function is described by the following figure:
 
 ![ProjectOverview](docs/Overview.png)
 
 # **Installation**
 
-The project source code is written in Python3 but is designed to be
-run using bash from the command line. An example bash script is
-included in the project repository.
+The project source code is written in Python3 and designed to be run
+either as separate functions called from the command line in bash, or
+all together as a snakemake workflow. Example bash scripts are
+included in each subdirectory of src/ with examples for running each
+python function, and an example snakefile is included in workflow/.
 
 ### **Dependencies**
+
+**Conda Environment with all Dependencies**
+
+A conda environment file with all of the necessary dependencies to
+run the source code has been provided at etc/csci6118_env.yml. To create
+a new conda environment from this file and then activate that environment,
+you can run the following:
+
+```bash
+conda env create --file etc/csci6118_env.yml
+conda activate csic6118_env
+```
+
+**Detailed List of Dependencies**
 
 Python3, bash, and R are required to run the code in this project.
 
 The dependencies for Python3 are:
-+ Numpy
-+ Pandas
++ numpy
++ pandas
++ pandas-gbq
 + matplotlib
 
 You can install these with the following code within the terminal:
 
+## TODO: do we want to remove this section since they could just use
+the conda environment instead?
+
 ``` bash
-conda install numpy
-conda install pandas
-conda install matplotlib
+conda install numpy pandas matplotlib
 ```
 
 The dependencies for R are:
-+ ggplot2
++ ggplot2 (or tidyverse)
++ dplyr (or tidyverse)
 + janitor
-+ dplyr
++ rpy2
 
 You can install these with the following code within the terminal:
 
+## TODO: remove this too?
 ``` bash
 Rscript -e "install.packages(c('janitor', 'dplyr', 'ggplot2'), repos='https://cran.rstudio.com')"
 
+# or with conda:
+conda install r-janitor r-tidyverse rpy2
 ```
 
-The example bash script sds_test_run.sh should be executed from the top
-level of the repository.
+The dependencies for snakemake and visualization of the snakemake diagram are:
++ snakemake
++ graphviz
+
+You can install these with the following code within the terminal:
+## TODO: remove this too?
+```bash
+conda install snakemake graphviz
+```
 
 ### **Step by Step Installation Instructions**
 
@@ -144,26 +188,31 @@ cd csci_6118_project
 ls
 ```
 ```
-LICENSE  README.md  docs/  src/ test/
+LICENSE  README.md  docs  docs_snakemake  etc  src  test  workflow
 ```
 
 This document is the README.md, docs/ contains any data or plots written
 out by the currently implemented code, src/ contains the source code
-for this project, and test/ contains the unit and functional tests.
+for this project, and test/ contains the unit and functional tests. The
+workflow/ directory contains the snakefile for snakemake automation, and
+the etc/ directory contains the conda environment recipe file with all
+dependencies and Google service account access to the BigQuery hosted
+LANL sequence metadata.
 
 4. The subset of test data download from the Los Alamos HIV Sequence
     Database is located at test/data/LANL_HIV1_2023_seq_metadata.csv.
 
 5. The src/ directory is currently split so that each team member has a
-    separate folder. Inside some of these folders, there are bash scripts
-    that can be used to run examples:
+    separate folder. Each of these folders contain bash scripts with
+    examples for how to run that portion of the code.
 
 ```bash
 cd src/sdslack
 bash sds_test_run.sh
 ```
     Nothing is printed upon successful execution, but a plot is added to the
-    docs/ folder, named according to the column that was selected.
+    test/data/output folder, named according to the column that was selected.
+
 
 # **Testing**
 
@@ -190,9 +239,75 @@ Style tests for python (PEP8, tested using pycodestyle), are executed when
 any branch is pushed to the GitHub-hosted repository as well as when a pull
 request is made on the main branch on GitHub. The code that runs these tests
 is located at .github/workflows/tests.yml. In order to run pycodestyle, the
-tests sets up mamba environment "csci6118" using its environment file at test/etc/csci6118_env.yml
+tests automatically set up a mamba environment "csci6118" using an environment
+file at test/etc/csci6118_env.yml
 
 # **Usage**
+
+### **Snakemake Automation**
+
+The codebase can be run in an automated fashion using the snakefile located
+at workflow/snakefile. It can be run with the following code:
+
+```bash
+cd workflow
+snakemake -c1
+
+```
+
+*To note: -c# controls how many cores are used. For automation of multiple*
+*queries at the same time, multiple cores can be used to run each query*
+*in parallel.*
+
+The following diagram shows the steps executed when running the snakemake
+pipeline:
+
+![SnakemakeDiagram](workflow/dag.png)
+
+A user can edit the top of the snakefile to run as many user-defined
+queries as desired. The portion of the file to edit is show here:
+
+```
+# TO NOTE: User edit to define query (or queries) between here and dashed line:
+# Set up days from infection filter
+num_list = "=0" + "".join(f",={i}" for i in range(1, 91))
+
+# Define QUERIES dictionary, adding new entry to each desired query
+QUERIES = {
+    'query_1': f"Days from Infection:{num_list}; Risk Factor:=IV Drug User",
+    'query_2': f"Days from Infection:{num_list}; Risk Factor:=Male Sex with Male, =Sex worker, =Heterosexual"
+}
+
+# -----------------------------------------------------------------------------------------
+```
+
+The column names available to be queried or output from the full dataset hosted
+on Google BigQuery are:
+
+```
+"#"                         "Patient Id"                "Patient Code"             
+"Patient Sex"               "Risk Factor"               "Infection Country"        
+"Infection City"            "Infection Year"            "Patient comment"          
+"HLA type"                  "Project"                   "Patient ethnicity"        
+"Progression"               "# of patient seqs"         "# of patient timepoints"  
+"Species"                   "SE id(SSAM)"               "PAT id(SSAM)"             
+"Name"                      "Locus Name"                "Isolate Name"             
+"Clone Name"                "Georegion"                 "Country"                  
+"Sampling City"             "Sampling Year"             "Sampling Year Upper"      
+"Patient Age"               "Patient Health"            "Organism"                 
+"Subtype"                   "Phenotype"                 "Coreceptor"               
+"Sample Tissue"             "Culture Method"            "Molecule type"            
+"Drug Naive"                "Problematic Sequence"      "Viral load"               
+"CD4 count"                 "CD8 count"                 "Days from Infection"      
+"Days from Seroconversion"  "Days from first Sample"    "Sequencing method"        
+"Amplification strategy"    "Fiebig Stage"              "Anno"                     
+"Days from treatment start" "Days from treatment end"   "Vaccine status"           
+"RIP subtype"               "SE id(SA)"                 "Accession"                
+"GI number"                 "Version"  
+```
+
+More detailed explanation on how to use these column names with filter parameters
+is given in the section focused on the querying code.
 
 ### **Examples**
 
@@ -218,11 +333,6 @@ bash run.sh
 
 ### **Plotting Code**
 
-*To note: queries to make the plots are currently implemented separately*
-*by each team member, but the goal is to eventually have all queries*
-*implemented by the main querying code (described in the next section)*
-*located at src/jb/query_data.py.*
-
 **src/gg**
 
 Within the src/gg folder, all scripts help create 
@@ -241,11 +351,12 @@ Within the src/gg folder, all scripts help create
     
 **src/sds**
 
-In the src/sds folder, sds_test_run.sh runs an example of the code that
-will create a histogram plot of the HIV subtypes in the test data. This is
-the plot that is created based on the selection of column 24 in the test
-data, but selecting a different column would cause the data in that column
-to be plotting instead, and would update plot labels as well as plot title.
+**Histogram plotting code:**
+
+In the src/sds folder, sds_test_run.sh runs three examples of the histogram
+plotting code - one summarizing a query column with integer values, one
+with float values, and one with string values. The code can also plot mixed
+types within one column, although an example is not shown for that.
 
 The test bash script can be run as follows:
 
@@ -254,34 +365,32 @@ cd src/sds
 bash sds_test_run.sh
 ```
 
-This will run query_categ_plot.py with the inputs given in the bash script
-(the path to the test data file and the column number to query). The help
-information for query_categ_plot.py clarifies this:
+This will run plot_hist.py three times with the inputs given in the bash
+script (the path to each of the three test counts files made by the code
+in src/lkr). The help information for query_categ_plot.py clarifies this:
 
 ``` bash
-python query_categ_plot.py --help
+python plot_hist.py --help
 ```
 
 ```
-usage: query_categ_plot [-h] --file-name FILE_NAME --categ-column CATEG_COLUMN --plot-path PLOT_PATH
+usage: plot_hist [-h] --file-name FILE_NAME --plot-output PLOT_OUTPUT
 
-Queries and plots histogram of values from any column from the input data.
+Uses counts of values from query column to plot histogram showing distribution of those values.
 
 options:
   -h, --help            show this help message and exit
   --file-name FILE_NAME
-                        Name of the data file to read
-  --categ-column CATEG_COLUMN
-                        Number of categorical column to query
-  --plot-path PLOT_PATH
+                        Name of the data file to read. Expects counts of values from query column as output by LKR, with unique values from queried column in first column and
+                        counts of those values insecond column
+  --plot-output PLOT_OUTPUT
                         Path to write output plot to
 ```
 
-The output plot is written to the docs/ folder and is named according to the
-name of the column selected. The query_categ_plot.py script calls on the
-functions in sds_utils.py:
+The plot_hist.py script calls on the functions in sds_utils.py:
 
-+ get_col_all - returns the values from a given column in a file
++ get_counts - reads counts of values from query column in format output
+    by src/lkr into dataframe
 + plot_hist - plots a histogram of values passed in
 
 The docustring for these functions can be accessed with the following code:
@@ -290,39 +399,54 @@ The docustring for these functions can be accessed with the following code:
 cd src/sds
 python
 import sds_utils
-sds_utils.get_col_all.__doc__
+sds_utils.get_counts.__doc__
 sds_utils.plot_hist.__doc__
 ```
 
 ```bash
-# For get_col_all
-Queries the given file and returns all values from
-the requested column.
+# For get_counts
+Reads the given CSV file with counts of values from query
+column into a pandas dataframe, in format output by src/lkr.
 
 Parameters
 ----------
 file_name : str
     Name of the file to query
-categ_col : int
-    Number of the column to query
 
 Returns
 -------
-result : list of str
-    List of all values from the requested column 
+counts : pandas dataframe
+    Dataframe of given CSV file with counts of column values
 
 # For plot_hist
-Plots histogram of values in a file. Writes out as .png.
+Plots histogram of given counts
 
 Parameters
 ----------
-result_col : list of str
-    List of all values from the requested column
+counts_df : pandas dataframe
+    Dataframe of given CSV file with counts of column values
 output_path : str
-    Path to write output plot to   
+    Path to write output plot to
 ```
 
-### **Main Querying Code**
+**Pandas Google BigQuery code:**
+
+The gbq_utils.py script is optionally used by jb/get_queried_data.py to
+query the entire set of metadata for sequences availabe on the LANL database,
+stored on Google BigQuery. Storing the metadata on BigQuery allows the use
+of panda-gbq to only download columns of interest to the user, instead of
+downloading all columns.
+
+The only function in gbq_utils.py is get_gbq_data. Its docustring contains
+the following:
+
+```
+Uses pandas-gbq to download only columns of interest from the table stored
+on Google BigQuery. Uses a service account with access limited to only the
+sequence database dataset.
+```
+
+### **Querying Code**
 
 **src/jb**
 
@@ -336,6 +460,11 @@ In the jb folder within the source folder, is the query_data.py script that will
     
 
 The code will take in four main parameters:
+
+# TODO: Sarah made the --file parameter optional, so if not given the code
+# automatically queries the entire dataset on Google BigQuery. It also looks
+# like there are more parameters now too? Might be worth printing out the help
+# function (exampel above in SDS section). 
 
 1. --file: Name of file and path to file
     - Only takes in a csv.
@@ -373,7 +502,3 @@ This is an example to show ways input can be written. This can be used on the te
 python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv 
 --filters "Subtype:=B,=35_A1D ; Georegion: =North America ; Sequence Length:1035-2025,<915 ; Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv --output_columns "Sequence Length, Sequence" --query_request_file ../../doc/query_summary_request.csv --global_logical_operator "||"
 ```
-
-### **Change Log***
-
-TODO: update this!

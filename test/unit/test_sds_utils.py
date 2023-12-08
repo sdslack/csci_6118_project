@@ -6,7 +6,6 @@ import random
 import os
 sys.path.insert(0, '../../src/sds')  # noqa
 import sds_utils
-import pandas
 
 
 class TestSdsUtils(unittest.TestCase):
@@ -35,12 +34,20 @@ class TestSdsUtils(unittest.TestCase):
         self.empty_file = "empty_file.csv"
         f = open(self.empty_file, 'w')
         f.close()
+        self.test_int_messy_file = 'test_int_messy_file.csv'
+        f = open(self.test_int_messy_file, 'w')
+        f.write('Days,Counts\n')
+        f.write('11,3\n')
+        f.write('b,10\n')
+        f.write('13,2\n')
+        f.close()
 
     def tearDown(self):
         os.remove(self.test_int_file)
         os.remove(self.test_float_file)
         os.remove(self.test_str_file)
         os.remove(self.empty_file)
+        os.remove(self.test_int_messy_file)
 
     def test_get_counts(self):
         r_int = sds_utils.get_counts(self.test_int_file)
@@ -56,26 +63,25 @@ class TestSdsUtils(unittest.TestCase):
         self.assertEqual(r_float_rows, 3)
         self.assertEqual(r_float_cols, 2)
 
-    # def test_get_counts_empty_file(self):
-        # r = sds_utils.get_counts(self.empty_file)
-        # r_rows, r_cols = r.shape
-        # self.assertRaises(pandas.errors.EmptyDataError, sds_utils.get_counts,
-        # self.empty_file)
-        # self.assertEqual(r_rows, 0)
-        # self.assertEqual(r_cols, 0)
+    def test_get_counts_empty_file(self):
+        self.assertRaises(SystemExit, sds_utils.get_counts, self.empty_file)
+
+    def test_get_counts_dne_file(self):
+        self.assertRaises(FileNotFoundError,
+                          sds_utils.get_counts,
+                          'file_dne.txt')
 
     def test_plot_hist(self):
         r_int = sds_utils.get_counts(self.test_int_file)
-        sds_utils.plot_hist(r_int, './')
-        self.assertTrue(os.path.exists('./Days from Infection_hist.png'))
+        sds_utils.plot_hist(r_int, 'test_int_hist.png')
+        self.assertTrue(os.path.exists('test_int_hist.png'))
 
-    # def test_plot_hist_empty_file(self):
-        # r = sds_utils.get_counts(self.empty_file)
-        # self.assertRaises(EmptyDataError, sds_utils.plot_hist, r, './')
-
-    # TODO: add tests for non-int values in counts column?
-    # TODO: fix tests for empty file
-    # TODO: add DNE file tests?
+    def test_plot_hist_int_messy_file(self):
+        # Because all essentially treated like strings, expect this
+        # mix of integers & strings to still make plot output
+        r_int_messy = sds_utils.get_counts(self.test_int_messy_file)
+        sds_utils.plot_hist(r_int_messy, 'test_int_messy_hist.png')
+        self.assertTrue(os.path.exists('test_int_messy_hist.png'))
 
 
 if __name__ == '__main__':

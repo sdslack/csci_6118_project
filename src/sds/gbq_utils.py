@@ -13,7 +13,9 @@ import pandas as pd
 
 
 def get_gbq_data(filters, output_columns):
-    """Function uses pandas-gbq to get BigQuery data.
+    """Uses pandas-gbq to download only columns of interest from
+    the table stored on Google BigQuery. Uses a service account
+    with access limited to only the sequence database dataset.
     """
     # Format column names to retrieve from BigQuery
     filter_chunks = filters.strip().split(';')
