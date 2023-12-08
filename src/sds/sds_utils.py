@@ -26,8 +26,11 @@ def get_counts(file_name):
     counts : pandas dataframe
         Dataframe of given CSV file with counts of column values
     """
-    counts_df = pd.read_csv(file_name)
-    # TODO: add code to confirm Counts in second column?
+    try:
+        counts_df = pd.read_csv(file_name)
+    except pd.errors.EmptyDataError:
+        sys.exit("Input data is empty.")
+    # counts_df = pd.read_csv(file_name)
     return counts_df
 
 
