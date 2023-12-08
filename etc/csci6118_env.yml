@@ -1,0 +1,15 @@
+name: csci6118_env
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - pandas-gbq
+  - rpy2
+  - ca-certificates
+  - certifi
+  - openssl
+  - r-janitor
+  - r-tidyverse
+  - snakemake
+  - graphviz
