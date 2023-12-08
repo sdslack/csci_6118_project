@@ -1,6 +1,7 @@
 """SDS functions for query and plot
 
-    * get_counts - reads counts output from LKR into dataframe
+    * get_counts - reads counts of values from query column
+        in format output by src/lkr into dataframe
     * plot_hist - plots a histogram of values passed in
 
 """
@@ -13,8 +14,8 @@ import pandas as pd
 
 
 def get_counts(file_name):
-    """Reads the given CSV file into a pandas dataframe. Expects
-    output from LKR.
+    """Reads the given CSV file with counts of values from query
+    column into a pandas dataframe, in format output by src/lkr.
 
     Parameters
     ----------
@@ -30,7 +31,6 @@ def get_counts(file_name):
         counts_df = pd.read_csv(file_name)
     except pd.errors.EmptyDataError:
         sys.exit("Input data is empty.")
-    # counts_df = pd.read_csv(file_name)
     return counts_df
 
 

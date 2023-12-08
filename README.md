@@ -4,14 +4,14 @@ TODO:
 
 + list of all potential column names so user knows options to query/output?
 + fix snakemake output!
+    + replace bash output with snakemake output once fixed!
 + add new Overview image to docs/ folder
 + test ENV file works to run everything
 + not sure what category of dependencies to put these in?
   - ca-certificates
   - certifi
   - openssl
-+ replace bash output with snakemake output once fixed!
-+ update my test code to output to test/data/output!
++ need to finish google big query tests
 
 ### **Scientific Background**
 
@@ -304,11 +304,6 @@ bash run.sh
 
 ### **Plotting Code**
 
-*To note: queries to make the plots are currently implemented separately*
-*by each team member, but the goal is to eventually have all queries*
-*implemented by the main querying code (described in the next section)*
-*located at src/jb/query_data.py.*
-
 **src/gg**
 
 Within the src/gg folder, all scripts help create 
@@ -327,11 +322,12 @@ Within the src/gg folder, all scripts help create
     
 **src/sds**
 
-In the src/sds folder, sds_test_run.sh runs an example of the code that
-will create a histogram plot of the HIV subtypes in the test data. This is
-the plot that is created based on the selection of column 24 in the test
-data, but selecting a different column would cause the data in that column
-to be plotting instead, and would update plot labels as well as plot title.
+**Histogram plotting code:**
+
+In the src/sds folder, sds_test_run.sh runs three examples of the histogram
+plotting code - one summarizing a query column with integer values, one
+with float values, and one with string values. The code can also plot mixed
+types within one column, although an example is not shown for that.
 
 The test bash script can be run as follows:
 
@@ -340,34 +336,32 @@ cd src/sds
 bash sds_test_run.sh
 ```
 
-This will run query_categ_plot.py with the inputs given in the bash script
-(the path to the test data file and the column number to query). The help
-information for query_categ_plot.py clarifies this:
+This will run plot_hist.py three times with the inputs given in the bash
+script (the path to each of the three test counts files made by the code
+in src/lkr). The help information for query_categ_plot.py clarifies this:
 
 ``` bash
-python query_categ_plot.py --help
+python plot_hist.py --help
 ```
 
 ```
-usage: query_categ_plot [-h] --file-name FILE_NAME --categ-column CATEG_COLUMN --plot-path PLOT_PATH
+usage: plot_hist [-h] --file-name FILE_NAME --plot-output PLOT_OUTPUT
 
-Queries and plots histogram of values from any column from the input data.
+Uses counts of values from query column to plot histogram showing distribution of those values.
 
 options:
   -h, --help            show this help message and exit
   --file-name FILE_NAME
-                        Name of the data file to read
-  --categ-column CATEG_COLUMN
-                        Number of categorical column to query
-  --plot-path PLOT_PATH
+                        Name of the data file to read. Expects counts of values from query column as output by LKR, with unique values from queried column in first column and
+                        counts of those values insecond column
+  --plot-output PLOT_OUTPUT
                         Path to write output plot to
 ```
 
-The output plot is written to the docs/ folder and is named according to the
-name of the column selected. The query_categ_plot.py script calls on the
-functions in sds_utils.py:
+The plot_hist.py script calls on the functions in sds_utils.py:
 
-+ get_col_all - returns the values from a given column in a file
++ get_counts - reads counts of values from query column in format output
+    by src/lkr into dataframe
 + plot_hist - plots a histogram of values passed in
 
 The docustring for these functions can be accessed with the following code:
@@ -376,39 +370,54 @@ The docustring for these functions can be accessed with the following code:
 cd src/sds
 python
 import sds_utils
-sds_utils.get_col_all.__doc__
+sds_utils.get_counts.__doc__
 sds_utils.plot_hist.__doc__
 ```
 
 ```bash
-# For get_col_all
-Queries the given file and returns all values from
-the requested column.
+# For get_counts
+Reads the given CSV file with counts of values from query
+column into a pandas dataframe, in format output by src/lkr.
 
 Parameters
 ----------
 file_name : str
     Name of the file to query
-categ_col : int
-    Number of the column to query
 
 Returns
 -------
-result : list of str
-    List of all values from the requested column 
+counts : pandas dataframe
+    Dataframe of given CSV file with counts of column values
 
 # For plot_hist
-Plots histogram of values in a file. Writes out as .png.
+Plots histogram of given counts
 
 Parameters
 ----------
-result_col : list of str
-    List of all values from the requested column
+counts_df : pandas dataframe
+    Dataframe of given CSV file with counts of column values
 output_path : str
-    Path to write output plot to   
+    Path to write output plot to
 ```
 
-### **Main Querying Code**
+**Pandas Google BigQuery code:**
+
+The gbq_utils.py script is optionally used by jb/get_queried_data.py to
+query the entire set of metadata for sequences availabe on the LANL database,
+stored on Google BigQuery. Storing the metadata on BigQuery allows the use
+of panda-gbq to only download columns of interest to the user, instead of
+downloading all columns.
+
+The only function in gbq_utils.py is get_gbq_data. Its docustring contains
+the following:
+
+```
+Uses pandas-gbq to download only columns of interest from the table stored
+on Google BigQuery. Uses a service account with access limited to only the
+sequence database dataset.
+```
+
+### **Querying Code**
 
 **src/jb**
 
@@ -422,6 +431,11 @@ In the jb folder within the source folder, is the query_data.py script that will
     
 
 The code will take in four main parameters:
+
+# TODO: Sarah made the --file parameter optional, so if not given the code
+# automatically queries the entire dataset on Google BigQuery. It also looks
+# like there are more parameters now too? Might be worth printing out the help
+# function (exampel above in SDS section). 
 
 1. --file: Name of file and path to file
     - Only takes in a csv.
@@ -459,4 +473,3 @@ This is an example to show ways input can be written. This can be used on the te
 python query_data.py --file ../../test/data/LANL_HIV1_2023_seq_metadata.csv 
 --filters "Subtype:=B,=35_A1D ; Georegion: =North America ; Sequence Length:1035-2025,<915 ; Percent non-ACGT:=0.0" --output_file ../../doc/filtered_data.csv --output_columns "Sequence Length, Sequence" --query_request_file ../../doc/query_summary_request.csv --global_logical_operator "||"
 ```
-
