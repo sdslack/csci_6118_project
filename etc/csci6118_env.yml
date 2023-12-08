@@ -14,3 +14,4 @@ dependencies:
   - r-tidyverse
   - snakemake
   - graphviz
+  - pycodestyle
