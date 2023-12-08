@@ -47,6 +47,7 @@ class TestSdsUtils(unittest.TestCase):
         os.remove(self.test_float_file)
         os.remove(self.test_str_file)
         os.remove(self.empty_file)
+        os.remove(self.test_int_messy_file)
 
     def test_get_counts(self):
         r_int = sds_utils.get_counts(self.test_int_file)
