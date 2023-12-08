@@ -42,14 +42,14 @@ rule make_hist_plots:
 
 rule make_csv_counts:
     input:
-        '../docs_snakemake/{query}_filtered_data.csv',
+        filt_data = "../docs_snakemake/{query}_filtered_data.csv"
     output:
-        '../docs_snakemake/{query}_{col_name}_counts.csv'
+        counts = "../docs_snakemake/{query}_{col_name}_counts.csv"
     shell:
         "python ../src/lkr/days_from_infection_plot.py " \
-        + "--csv_file '{input}' " \
+        + "--csv_file '{input.filt_data}' " \
         + "--column_name '{col_name}' " \
-        + "--output_file '{output}' "
+        + "--output_file '{output.counts}' "
 
 rule make_consort:
     input:
@@ -79,6 +79,6 @@ rule run_query:
         + "--filters '{params.value}' " \
         + "--query_output_file {output.filt_data} " \
         + "--query_cols_all_data_file '{output.all_data}' " \
-        + "--output_columns 'SE id(SA)' " \
+        + "--output_columns 'SE id(SA), Days from Infection, Risk Factor' " \
         + "--query_request_file {output.req_summ} " \
         + "--global_logical_operator '&&'"
