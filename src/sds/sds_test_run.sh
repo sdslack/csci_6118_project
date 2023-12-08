@@ -5,26 +5,17 @@ set -u  # raise error if variable is unset
 set -o pipefail  # fail if any prior step failed
 
 
-### Testing int counts
-# Set parameters
-file_name="../../test/data/output/int_count_output.csv"
-
-# Run code
+# Testing int counts output by LKR
 python plot_hist.py \
-    --file-name "$file_name" --plot-path "../../docs"
+    --file-name "../../test/data/output/int_count_output.csv" \
+    --plot-output "../../test/data/output/int_hist.png"
 
-### Testing float counts
-# Set parameters
-file_name="../../test/data/output/float_count_output.csv"
-
-# Run code
+# Testing float counts output by LKR
 python plot_hist.py \
-    --file-name "$file_name" --plot-path "../../docs"
+    --file-name "../../test/data/output/float_count_output.csv" \
+    --plot-output "../../test/data/output/float_hist.png"
 
-### Testing string counts
-# Set parameters
-file_name="../../test/data/output/str_count_output.csv"
-
-# Run code
+# Testing string counts output by LKR
 python plot_hist.py \
-    --file-name "$file_name" --plot-path "../../docs"
+    --file-name "../../test/data/output/str_count_output.csv" \
+    --plot-output "../../test/data/output/str_hist.png"
