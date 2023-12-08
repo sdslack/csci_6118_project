@@ -1,8 +1,6 @@
 # **Overview**
 
-TODO:
-
-+ list of all potential column names so user knows options to query/output?
+Sarah still TODO:
 + fix snakemake output!
     + replace bash output with snakemake output once fixed!
 + add new Overview image to docs/ folder
@@ -12,6 +10,9 @@ TODO:
   - certifi
   - openssl
 + need to finish google big query tests
+
+Other group TODOs:
++ listed a few throughout, always starting with TODO!
 
 ### **Scientific Background**
 
@@ -279,6 +280,34 @@ QUERIES = {
 
 # -----------------------------------------------------------------------------------------
 ```
+
+The column names available to be queried or output from the full dataset hosted
+on Google BigQuery are:
+
+```
+"#"                         "Patient Id"                "Patient Code"             
+"Patient Sex"               "Risk Factor"               "Infection Country"        
+"Infection City"            "Infection Year"            "Patient comment"          
+"HLA type"                  "Project"                   "Patient ethnicity"        
+"Progression"               "# of patient seqs"         "# of patient timepoints"  
+"Species"                   "SE id(SSAM)"               "PAT id(SSAM)"             
+"Name"                      "Locus Name"                "Isolate Name"             
+"Clone Name"                "Georegion"                 "Country"                  
+"Sampling City"             "Sampling Year"             "Sampling Year Upper"      
+"Patient Age"               "Patient Health"            "Organism"                 
+"Subtype"                   "Phenotype"                 "Coreceptor"               
+"Sample Tissue"             "Culture Method"            "Molecule type"            
+"Drug Naive"                "Problematic Sequence"      "Viral load"               
+"CD4 count"                 "CD8 count"                 "Days from Infection"      
+"Days from Seroconversion"  "Days from first Sample"    "Sequencing method"        
+"Amplification strategy"    "Fiebig Stage"              "Anno"                     
+"Days from treatment start" "Days from treatment end"   "Vaccine status"           
+"RIP subtype"               "SE id(SA)"                 "Accession"                
+"GI number"                 "Version"  
+```
+
+More detailed explanation on how to use these column names with filter parameters
+is given in the section focused on the querying code.
 
 ### **Examples**
 
