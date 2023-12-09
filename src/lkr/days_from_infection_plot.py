@@ -2,7 +2,6 @@ import sys
 import lkr_utils
 
 
-
 def main():
     # Use the get_args function to parse command-line arguments
     args = lkr_utils.get_args()
@@ -13,6 +12,7 @@ def main():
                                         args.output_file)
 
     print(f"Output CSV file saved to: {args.output_file}")
+
 
 if __name__ == "__main__":
     main()
