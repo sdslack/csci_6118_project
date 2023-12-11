@@ -1,11 +1,5 @@
 # **Overview**
 
-Sarah still TODO:
-+ fix snakemake output!
-    + replace bash output with snakemake output once fixed!
-    + fix manual addition of Days from Infection, Risk Factor?
-+ need to finish google big query tests
-
 Other group TODOs:
 + listed a few throughout, always starting with TODO!
 
@@ -120,7 +114,9 @@ conda activate csic6118_env
 
 **Detailed List of Dependencies**
 
-Python3, bash, and R are required to run the code in this project.
+Python3, bash, and R are required to run the code in this project. All
+dependencies are installed using the conda environment file described above
+but are listed here for reference.
 
 The dependencies for Python3 are:
 + numpy
@@ -128,48 +124,21 @@ The dependencies for Python3 are:
 + pandas-gbq
 + matplotlib
 
-You can install these with the following code within the terminal:
-
-## TODO: do we want to remove this section since they could just use
-the conda environment instead?
-
-``` bash
-conda install numpy pandas matplotlib
-```
-
 The dependencies for R are:
 + ggplot2 (or tidyverse)
 + dplyr (or tidyverse)
 + janitor
 + rpy2
 
-You can install these with the following code within the terminal:
-
-## TODO: remove this too?
-``` bash
-Rscript -e "install.packages(c('janitor', 'dplyr', 'ggplot2'), repos='https://cran.rstudio.com')"
-
-# or with conda:
-conda install r-janitor r-tidyverse rpy2
-```
-
 The dependencies for snakemake and visualization of the snakemake diagram are:
 + snakemake
 + graphviz
 
-You can install these with the following code within the terminal:
-## TODO: remove this too?
-```bash
-conda install snakemake graphviz
-```
+Finally, there are additional general dependencies:
 
-Finally, there are additional dependencies that need to be installed
-using conda:
-## TODO: remove this too?
-```bash
-conda install ca-certificates certifi openssl
-
-```
++ ca-certificates
++ certifi
++ openssl
 
 ### **Step by Step Installation Instructions**
 
