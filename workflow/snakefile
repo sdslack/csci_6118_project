@@ -21,15 +21,15 @@ for key, val in QUERIES.items():
 
 rule all:
     input:
-        expand("../docs_snakemake/{query}_{col_name}_hist.png",
+        expand("../docs/{query}_{col_name}_hist.png",
                query=list(QUERIES.keys()), col_name=col_names),
-        expand("../docs_snakemake/{query}_consort_plot.png", query=list(QUERIES.keys()))
+        expand("../docs/{query}_consort_plot.png", query=list(QUERIES.keys()))
 
 rule make_hist_plots:
     input:
-        '../docs_snakemake/{query}_{col_name}_counts.csv'
+        '../docs/{query}_{col_name}_counts.csv'
     output:
-        '../docs_snakemake/{query}_{col_name}_hist.png'
+        '../docs/{query}_{col_name}_hist.png'
     shell:
         "python ../src/sds/plot_hist.py " \
         + "--file-name '{input}' " \
@@ -37,9 +37,9 @@ rule make_hist_plots:
 
 rule make_csv_counts:
     input:
-        filt_data = "../docs_snakemake/{query}_filtered_data.csv"
+        filt_data = "../docs/{query}_filtered_data.csv"
     output:
-        counts = "../docs_snakemake/{query}_{col_name}_counts.csv"
+        counts = "../docs/{query}_{col_name}_counts.csv"
     params:
         col_name = lambda wildcards: wildcards.col_name
     shell:
@@ -50,11 +50,11 @@ rule make_csv_counts:
 
 rule make_consort:
     input:
-        all_data = "../docs_snakemake/{query}_all_data.csv",
-        req_summ = "../docs_snakemake/{query}_request_summary.csv"
+        all_data = "../docs/{query}_all_data.csv",
+        req_summ = "../docs/{query}_request_summary.csv"
     output:
-        cons_plot = "../docs_snakemake/{query}_consort_plot.png",
-        cons_input = "../docs_snakemake/{query}_filtered_consort_input.csv"
+        cons_plot = "../docs/{query}_consort_plot.png",
+        cons_input = "../docs/{query}_filtered_consort_input.csv"
     shell:
         "python3 ../src/gg/create_consort.py " \
         + "--consort_input_file_path '{input.all_data}' " \
@@ -64,9 +64,9 @@ rule make_consort:
 
 rule run_query:
     output:
-        filt_data = "../docs_snakemake/{query}_filtered_data.csv",
-        all_data = "../docs_snakemake/{query}_all_data.csv",
-        req_summ = "../docs_snakemake/{query}_request_summary.csv"
+        filt_data = "../docs/{query}_filtered_data.csv",
+        all_data = "../docs/{query}_all_data.csv",
+        req_summ = "../docs/{query}_request_summary.csv"
     params:
         value = lambda wcs: QUERIES[wcs.query],
         col_list = lambda wcs: ', '.join(col_names)
