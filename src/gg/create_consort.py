@@ -9,6 +9,7 @@ import consort_prep_functions as pf
 sys.path.append('../jb')  # noqa
 import query_utils as query
 
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--consort_input_file_path',
@@ -46,7 +47,7 @@ def main():
     out_consort_png = str(args.out_consort_png)
     consort_input_df = pf.consort_filter_data(consort_input_data,
                                               filters_provided,
-                                             bool_out_csv)
+                                              bool_out_csv)
     pf.run_consort_plot_rcode(consort_input_df, query_df_formatted,
                               out_consort_png, logical_operator)
 
