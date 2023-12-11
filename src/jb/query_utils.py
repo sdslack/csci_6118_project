@@ -82,9 +82,10 @@ def extract_symbol_and_value(user_input):
         symbol = match.group(1)
         value = match.group(2)
         value_cleaned = value.strip()
-        return symbol, value
+        return symbol, value_cleaned
     else:
-        return '-', cleaned_input
+        cleaned_input_no_ws = cleaned_input.replace(" ", "")
+        return '-', cleaned_input_no_ws
 
 
 # Helper function for creating numeric masks
@@ -121,6 +122,10 @@ def create_numeric_mask(column, symbol, value):
         return (column != float(value))
     elif symbol == '=':
         return (column == float(value))
+    else:
+        raise ValueError("Column must be filtered by >, <, \
+        <=, >=, =, !=")
+        sys.exit(1)
 
 def create_by_filter_boolean_filter_summary(filters, data, existing_cols):
     """Retrieve a dictionary of boolean values based on a single comparison operator
@@ -138,8 +143,16 @@ def create_by_filter_boolean_filter_summary(filters, data, existing_cols):
     -------
     Two dictionaries of boolean values based on comparison operator
     One dictionary contains boolean values only for "!=" operators, if employed
-    One dictionary contains boolean values for all other comparison operators, if employed
+    One dictionary contains boolean values 
+    for all other comparison operators, if employed
     """
+    # Check inputs
+    if not isinstance(filters, dict):
+        raise ValueError("Filters should be in Python Dictionary format.")
+        sys.exit(1)
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("Data must be a pandas dataframe.")
+    
     # Create dictionaries to store masks for each key
     column_masks = {}
     not_equals_masks = {}
@@ -192,6 +205,14 @@ def create_by_column_boolean_filter_summary(column_masks, not_equals_masks, key)
     A list of boolean values explaining how a given column in a dataset would be filtered
     Based on combining all relevant filters for that column
     """
+    # Check if input is a pd.Series and boolean type
+    if not isinstance(column_masks, dict):
+        raise ValueError(column_masks + "is not a dictionary")
+        sys.exit(1)
+    if not isinstance(not_equals_masks, dict):
+        raise ValueError(not_column_masks + "is not a dictionary")
+        sys.exit(1)
+    
     column_mask_key_combined = []
     not_equals_mask_key_combined = []
     key_mask_combined = []
@@ -206,6 +227,9 @@ def create_by_column_boolean_filter_summary(column_masks, not_equals_masks, key)
         key_mask_combined = column_mask_key_combined
     elif len(not_equals_mask_key_combined)>=1:
         key_mask_combined = not_equals_mask_key_combined
+    else:
+        print("No filters detected for" + key + " provided; \
+        dataset will not be subset by this column.")
     return key_mask_combined
     
 
@@ -232,11 +256,13 @@ def filter_data(data, filters, output_cols, logical_operator="&&"):
     # check if column is in data
     existing_cols = check_column_exists(filters.keys(), filtered_data)
 
-    column_masks, not_equals_masks = create_by_filter_boolean_filter_summary(filters, filtered_data, existing_cols)
+    column_masks, not_equals_masks = create_by_filter_boolean_filter_summary(
+        filters, filtered_data, existing_cols)
 
     summary_masks = []
     for key in existing_cols:
-        key_mask_combined = create_by_column_boolean_filter_summary(column_masks, not_equals_masks, key)
+        key_mask_combined = create_by_column_boolean_filter_summary(
+            column_masks, not_equals_masks, key)
         summary_masks.append(key_mask_combined)
 
     # Combine all summary masks into the final mask
@@ -306,8 +332,12 @@ def split_arguments(filter_parameter):
     filter_args
         List of all filter arguments.
     """
-    args = filter_parameter.strip()
-    filter_args = args.split(';')
+    try:
+        args = filter_parameter.strip()
+        filter_args = args.split(';')
+    except (AttributeError, ValueError):
+        print("Ensure filter_parameter is a string and follows README format.")
+        sys.exit(1)
 
     # cleans list for any empty values in case extra && is included
     cleaned_args = [filter.strip() for filter in filter_args if filter]

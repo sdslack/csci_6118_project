@@ -251,7 +251,7 @@ class TestQueryData(unittest.TestCase):
         df_cols = df.columns
         data = {'Search_Options': ['Days from Infection', 'Sequence', 'Float'],
                 'Filter Criteria': [float("NaN"), '=a', float("NaN")],
-                'Do you plan to search by this column?': [float("NaN"), 'yes', float("NaN")]}
+                'Search by this column?': [float("NaN"), 'Yes', float("NaN")]}
         query_request = pd.DataFrame(data)
         actual_df = query_data.make_query_request_summary(filters, df_cols)
         assert_frame_equal(actual_df, query_request)
@@ -261,14 +261,33 @@ class TestQueryData(unittest.TestCase):
                    'Sequence': ['=a', '=b']}
         data = {'Search_Options': ['Days from Infection', 'Sequence', 'Float'],
                 'Filter Criteria': ['<=22;!=29', '=a;=b', float("NaN")],
-                'Do you plan to search by this column?': ['yes', 'yes', float("NaN")]}
+                'Search by this column?': ['Yes', 'Yes', float("NaN")]}
         query_request = pd.DataFrame(data)
         actual_df = query_data.make_query_request_summary(filters, df_cols)
         assert_frame_equal(actual_df, query_request)
+        
+    def test_create_numeric_mask(self):
+        data_long = pd.DataFrame({'Column_1': ['Drug', 'Heterosexual, unspecified',
+                                              'Mom to Child', 'Sex Worker', 'None'],
+                                 'Column_2': [1, 90, 45, 123, 250],
+                                 'Column_3': [9.2, 5.4, 4,   3.0, 11]})
+        # Integers
+        actual_mask = query_data.create_numeric_mask(data_long['Column_2'], ">" , 100)
+        expected_mask = [False, False, False, True, True]
+        self.assertTrue(all(actual_mask==expected_mask))
+
+        # Floats
+        actual_mask2 = query_data.create_numeric_mask(data_long['Column_3'], "-" , "3.0-6.0")
+        expected_mask2 = [False, True, True, True, False]
+        self.assertTrue(all(actual_mask2==expected_mask2))
+
+        # Symbol that doesn't make sense
+        with self.assertRaises(ValueError):
+            query_data.create_numeric_mask(data_long['Column_2'], "!" , 100)
 
     def test_extract_symbol_and_value(self):
-        user_input = '= 5'
-        expected_symbol = '='
+        user_input = "= 5"
+        expected_symbol = "="
         expected_value = '5'
         actual_symbol, actual_value = query_data.extract_symbol_and_value(user_input)
         self.assertEqual(actual_symbol, expected_symbol)
@@ -329,5 +348,136 @@ class TestQueryData(unittest.TestCase):
         operator = '&'
         with self.assertRaises(SystemExit):
             query_data.check_for_logical_operator(filters, operator)
+
+
+class test_boolean_filter_functions_in_Query_Utils(unittest.TestCase):
+    
+    @classmethod
+    def setUp (self):
+        data_long = {'Column_1': ["Red", "Blue", "Blue", "Green", "Purple"],
+                'Column_2': [2, 6, 9, 1, 4],
+                'Column_3': [9.2, 5.4, 4, 3.0, 11]}
+
+        # With floats
+        self.df_long_df = pd.DataFrame(data_long)
+        filters_floats = {'Column_3': ['<=9','!=4', '>=10']}
+        existing_cols_floats = ['Column_3']
+        self.df_long_filtered_equals_mask, \
+        self.df_long_filtered_not_equals_mask = \
+        query_data.create_by_filter_boolean_filter_summary(filters_floats,
+                                                           self.df_long_df,
+                                                           existing_cols_floats)
+        expected_filter2 = [True, True, False, True, True]
+        self.expected_series2 = pd.Series(expected_filter2)
+        self.df_long_filtered_not_equals_mask_df = pd.DataFrame(
+            self.df_long_filtered_not_equals_mask)
+        self.df_long_filtered_equals_mask_df = pd.DataFrame(
+            self.df_long_filtered_equals_mask)
+        self.actual_filter2 = self.df_long_filtered_not_equals_mask_df.loc[0,
+                                                                 'Column_3']
         
+        # With integers
+        filters_int = {'Column_2': ['!=6','!=4']}
+        existing_cols_int = ['Column_2']
+        expected_filter_int1 = [True, False, True, True, True]
+        expected_filter_int2 = [True, True, True, True, False]
+        self.expected_series_int1 = pd.Series(expected_filter_int1)
+        self.expected_series_int2 = pd.Series(expected_filter_int2)
+        self.df_long_filtered_equals_mask_int, \
+        self.df_long_filtered_not_equals_mask_int = \
+        query_data.create_by_filter_boolean_filter_summary(filters_int,
+                                                           self.df_long_df,
+                                                           existing_cols_int)
+        self.df_long_filtered_not_equals_mask_int_df = pd.DataFrame(
+            self.df_long_filtered_not_equals_mask_int)
+        self.actual_filter_int1 = self.df_long_filtered_not_equals_mask_int_df.loc[0,
+                                                                 'Column_2']
+        self.actual_filter_int2 = self.df_long_filtered_not_equals_mask_int_df.loc[1,
+                                                                 'Column_2']
         
+        # With strings
+        self.filters_str = {'Column_1': ['=Blue']}
+        existing_cols_str = ['Column_1']
+        self.df_long_filtered_str, self.df_long_filtered_not_equals_mask_str = \
+        query_data.create_by_filter_boolean_filter_summary(self.filters_str,
+                                                           self.df_long_df,
+                                                           existing_cols_str)
+        expected_filter = [False, True, True, False, False]
+        self.expected_series = pd.Series(expected_filter)
+        df_long_filtered_str_df = pd.DataFrame(self.df_long_filtered_str)
+        self.actual_filter = df_long_filtered_str_df.loc[0, 'Column_1']
+        
+        # With empty
+        self.empty_equals_mask, self.empty_not_equals_mask = \
+        query_data.create_by_filter_boolean_filter_summary(self.filters_str,
+                                                           self.df_long_df,
+                                                           "Column 5")
+        
+    def test_create_by_filter_boolean_filter_summary(self):
+        
+        # With floats
+        self.assertTrue(all(self.actual_filter2 == self.expected_series2))
+        
+        # Checking that getting separate equals and not equals masks
+        self.assertEqual(len(self.df_long_filtered_equals_mask_df), 2)
+        self.assertEqual(len(self.df_long_filtered_not_equals_mask_df), 1)
+        
+        # With integers
+        self.assertTrue(all(self.actual_filter_int1 == self.expected_series_int1))
+        self.assertTrue(all(self.actual_filter_int2 == self.expected_series_int2))
+
+        #With strings
+        self.assertTrue(all(self.actual_filter == self.expected_series))
+        
+        # With empty
+        self.assertDictEqual(self.empty_equals_mask, {})
+
+    def test_create_by_column_boolean_filter_summary(self):
+        
+        # With multiple not equals and equals masks needing to be combined
+        # And use of floats
+        expected_column_filter = [False, True, False, True, True]
+        expected_column_series = pd.Series(expected_column_filter)
+        actual_column_series = query_data.create_by_column_boolean_filter_summary(
+            self.df_long_filtered_equals_mask,
+            self.df_long_filtered_not_equals_mask,
+            'Column_3')
+        self.assertTrue(all(actual_column_series == expected_column_series))
+        
+        # Check if get empty subset if incorrect key is provided
+        actual_wrong_key_series = query_data.create_by_column_boolean_filter_summary(
+            self.df_long_filtered_equals_mask,
+            self.df_long_filtered_not_equals_mask,
+            'Column_14')
+        self.assertEqual(len(actual_wrong_key_series), 0)
+        
+        # With multiple not equals masks needing to be combined
+        # And use of integers
+        expected_column_filter_int = [True, False, True, True, False]
+        expected_column_series_int = pd.Series(expected_column_filter_int)
+        actual_column_series_int = query_data.create_by_column_boolean_filter_summary(
+            self.df_long_filtered_equals_mask_int,
+            self.df_long_filtered_not_equals_mask_int,
+            'Column_2')
+        self.assertTrue(all(actual_column_series_int == expected_column_series_int))
+        
+        # With just one equals mask needing to be combined and use of strings
+        actual_column_series_str = query_data.create_by_column_boolean_filter_summary(
+            self.df_long_filtered_str,
+            self.df_long_filtered_not_equals_mask_str,
+            'Column_1')
+        self.assertTrue(all(actual_column_series_str == self.expected_series))
+        
+        # With no masks provided
+        actual_column_series_empty = query_data.create_by_column_boolean_filter_summary(
+            self.empty_equals_mask,
+            self.empty_not_equals_mask,
+            'Column_1')
+        self.assertEqual(len(actual_column_series_empty), 0)
+        
+        # Dictionaries not provided
+        with self.assertRaises(ValueError):
+            query_data.create_by_column_boolean_filter_summary(
+            "Random",
+            self.empty_not_equals_mask,
+            'Column_1')

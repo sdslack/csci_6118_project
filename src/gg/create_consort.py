@@ -36,17 +36,16 @@ def get_args():
 def main():
     args = get_args()
     consort_input_file_path = str(args.consort_input_file_path)
-    consort_input_file = query.load_data(consort_input_file_path)
+    consort_input_data = query.load_data(consort_input_file_path)
     filters = args.filters
     query_summary_file = args.query_summary_file
     query_df_formatted, filters_provided = pf.make_query_df_formatted(
-        filters, query_summary_file, consort_input_file)
+        filters, query_summary_file, consort_input_data)
     logical_operator = str(args.global_logical_operator)
     bool_out_csv = args.bool_out_csv
     out_consort_png = str(args.out_consort_png)
-    consort_input_df = pf.consort_filter_data(consort_input_file,
+    consort_input_df = pf.consort_filter_data(consort_input_data,
                                               filters_provided,
-                                             logical_operator,
                                              bool_out_csv)
     pf.run_consort_plot_rcode(consort_input_df, query_df_formatted,
                               out_consort_png, logical_operator)

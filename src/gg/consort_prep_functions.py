@@ -5,8 +5,10 @@ import re
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 import os
+sys.path.append('../jb')  # noqa
 sys.path.append('../src/jb')  # noqa
 sys.path.append('src/jb')  # noqa
+sys.path.insert(0, '../../src/jb')  # noqa # THIS ONE
 sys.path.insert(0, 'jb')  # noqa
 sys.path.insert(0, '../src/gg')  # noqa
 sys.path.insert(0, 'gg')  # noqa
@@ -73,22 +75,24 @@ def subset_dataframe_by_names(data, column_names):
         sys.exit(1)
     return data_subset
 
-def consort_filter_data(data, filters, output_cols, bool_out_csv = None):
+
+def consort_filter_data(data, filters,
+                        bool_out_csv = None):
     """Filter the data based on the provided filters
     and create input for the consort plot
 
     Parameters
     ----------
-    data : .csv file
+    data : Pandas dataframe.
         Name of the file to be searched.
     filters: dict
         Dictionary of filters.
         Each label is the name of the column.
         Each value are the filter criteria.
-    output_cols: list
-        List of columns to output to final df.
     logical operator:
         How to combine filters from multiple columns
+        Defaults to logical "and" ("&&").
+        Other possibility is logical "or" ("||").
     bool_out_csv:
         Optional.
         If would like a copy of the consort_input_df as a csv,
@@ -103,35 +107,56 @@ def consort_filter_data(data, filters, output_cols, bool_out_csv = None):
     if not isinstance(data, pd.DataFrame):
         raise ValueError("Data must be in a pandas dataframe")
         sys.exit(1)
-    else:
+    try:
         consort_input_df_pre = data
+    except (NameError):
+        print("Pandas dataframe data not found")
+        sys.exit(1)
 
     # check if column is in data
-    existing_cols = query.check_column_exists(filters.keys(), consort_input_df_pre)
+    existing_cols = query.check_column_exists(filters.keys(),
+                                              consort_input_df_pre)
 
     # Subset consort_input_df to only the relevant columns
     request_query_col = list(filters.keys())
     consort_input_df = subset_dataframe_by_names(consort_input_df_pre,
                                                  request_query_col)
 
-    column_masks, not_equals_masks = query.create_by_filter_boolean_filter_summary(filters, consort_input_df, existing_cols)
+    column_masks, not_equals_masks = \
+    query.create_by_filter_boolean_filter_summary(filters,
+                                                  consort_input_df,
+                                                  existing_cols)
 
     for key in existing_cols:
-        key_mask_combined = query.create_by_column_boolean_filter_summary(column_masks, not_equals_masks, key)
+        key_mask_combined = query.create_by_column_boolean_filter_summary(
+            column_masks, not_equals_masks, key)
         column_name = f'Filtered_Column_{key}'
         consort_input_df[column_name] = key_mask_combined
     
     # Give option to write consort_input_df into a csv file
     if bool_out_csv is not None:
-        consort_df_file_path = bool_out_csv
-        consort_input_df.to_csv(consort_df_file_path, index=False)
+        try:
+            bool_out_csv_str = str(bool_out_csv)
+        except(ValueError):
+            print("bool_out_csv must be a file path string")
+        if not bool_out_csv_str.endswith(".csv"):
+            raise KeyError("File path must end with .csv")
+            sys.exit(1)
+        try:
+            consort_df_file_path = bool_out_csv_str
+            consort_input_df.to_csv(consort_df_file_path, index=False)
+        except (FileNotFoundError, OSError):
+            print("File path not found. Please check bool_out_csv")
+            sys.exit(1)
     
     # Output pandas dataframe for use in R
     return(consort_input_df)
 
+
 def query_file_to_filter(query_summary_file):
     """This function will prepare a user query request file
-    For the creation of a consort diagram.
+    For the creation of a consort diagram. It is called
+    in the make_query_df_formatted function.
 
     Parameters
     ----------
@@ -148,8 +173,17 @@ def query_file_to_filter(query_summary_file):
     except (FileNotFoundError, NameError):
         print("Cannot find " + query_summary_file)
         sys.exit(1)
+    # Ensure correct format
+    desired_columns = ["Search_Options", "Filter Criteria",
+                         'Search by this column?']
+    if not all(col in query_summary_file_pd.columns \
+                          for col in desired_columns):
+        raise ValueError("Incorrect column names in query_summary_file")
+        sys.exit(1)
+
     query_summary_file_short = query_summary_file_pd[ \
         query_summary_file_pd['Search by this column?'] == 'Yes']
+
     filters = {}
     for index, row in query_summary_file_short.iterrows():
         new_filters = {}
@@ -166,28 +200,56 @@ def query_file_to_filter(query_summary_file):
 
 # Format query summary
 def make_query_df_formatted(filters = None, query_summary_file = None,
-                            consort_input_file = None):
-    if filters != None and query_summary_file != None:
+                            consort_input_data = None):
+    """This function will use provided filters or a query summary file
+    to format the query summary correctly for use for the R consort
+    diagram code.
+
+    Parameters
+    ----------
+    filters:
+        Optional.
+        A dictionary with keys as column names and values as
+        filters you want to search by.
+
+    query_summary_file:
+        Optional.
+        .csv file generated by query_utils.py
+    
+    consort_input_data:
+        Must be specified when filters are given.
+        The data to filter, in a pandas dataframe.
+
+    Returns
+    -------
+    query_df_formatted: A formatted pandas df
+        Ready for input into the run_consort_plot_rcode function.
+    filters: A dictionary
+        Listing how data should be filtered
+    """
+    if (filters is not None) & (query_summary_file is not None):
         raise ValueError("Cannot specify query_summary file and filters")
         sys.exit(1)
     elif filters != None:
-        if consort_input_file is None:
-            raise ValueError("Must specify consort_input_file")
+        if consort_input_data is None:
+            raise ValueError("Must specify consort_input_data")
             sys.exit(1)
-        else:
-            column_names = consort_input_file.columns.tolist()
+        elif isinstance(consort_input_data, pd.DataFrame):
+            column_names = consort_input_data.columns.tolist()
             filter_args = query.split_arguments(filters)
             filters_provided = query.get_filters(filter_args)
             query_df_formatted_long = query.make_query_request_summary(
                 filters_provided, column_names)
+        else:
+            raise ValueError("consort_input_data must be a pandas dataframe.")
     elif query_summary_file != None:
-        # query_summary_file = str(query_summary_file)
-        filters_provided = query_file_to_filter(query_summary_file)
         try:
             query_df_formatted_long = pd.read_csv(query_summary_file)
         except (FileNotFoundError, NameError):
             print("Cannot find " + query_summary_file)
             sys.exit(1) 
+        filters_provided = query_file_to_filter(query_summary_file)
+
     else:
         raise ValueError("Must specify either query_summary_file or filters")
         sys.exit(1)
@@ -200,7 +262,7 @@ def make_query_df_formatted(filters = None, query_summary_file = None,
 def run_consort_plot_rcode(consort_input_df,
                            query_df_formatted,
                            out_consort_png,
-                          logical_operator):
+                          logical_operator="&&"):
     """Output is a png file of a consort diagram
 
     Parameters
@@ -208,6 +270,15 @@ def run_consort_plot_rcode(consort_input_df,
     consort_input_df: A pandas dataframe containing database data
     query_df_formatted: A pandas dataframe summarizing query requests
     out_consort_png: A file path ending in .png where consort will be saved
+    logical operator:
+        "&&" if data should be filtered to include
+        entries which only satisfy ALL column filters
+        There will be subsetting of the data in the consort diagram;
+        the order of the filters will matter for visualization
+        "||" if data should be filtered to include entries which satisfy
+        at least one column filter
+        There will be no subsetting of the data in the consort diagram
+        between column filters.
 
     Returns
     -------
@@ -220,7 +291,9 @@ def run_consort_plot_rcode(consort_input_df,
             sys.exit(1)
     except NameError:
         print(consort_input_df + " cannot be found.")
-        sys.error(1)
+        sys.exit(1)
+    if len(consort_input_df)<1:
+        raise ValueError(consort_input_df + " is empty")
     
     try:
         if not isinstance(query_df_formatted, pd.DataFrame):
@@ -228,7 +301,9 @@ def run_consort_plot_rcode(consort_input_df,
             sys.exit(1)
     except NameError:
         print(query_df_formatted + " cannot be found.")
-        sys.error(1)
+        sys.exit(1)
+    if len(query_df_formatted)<1:
+        raise ValueError(query_df_formatted + " is empty")
 
     out_consort_png = str(out_consort_png)
     if not out_consort_png.endswith(".png"):
@@ -254,8 +329,11 @@ def run_consort_plot_rcode(consort_input_df,
     elif os.path.exists('src/gg/consort_plot.r'):
         with open('src/gg/consort_plot.r', 'r') as file:
             r_code = file.read()
-    else:
+    elif os.path.exists('../src/gg/consort_plot.r'):
         with open('../src/gg/consort_plot.r', 'r') as file:
+            r_code = file.read()
+    else:
+        with open('../../src/gg/consort_plot.r', 'r') as file:
             r_code = file.read()
     # Execute r code
     robjects.r(r_code)
