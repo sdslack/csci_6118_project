@@ -1,4 +1,4 @@
-"""SDS function for Google BigQuery
+"""Function to get partial dataset from Google BigQuery
 
     * get_gbq_data - Uses pandas-gbq to get specific columns
 
@@ -6,11 +6,15 @@
 
 from google.oauth2 import service_account
 import pandas as pd
+import os
+import sys
+sys.path.insert(0, '../etc')  # noqa
+sys.path.insert(0, '../../etc')  # noqa
+import pandas_gbq.exceptions
 
 # To note: this script uses a service account private key
 # to gain access to the Google BigQuery dataset. The service
 # account ONLY has access to the BigQuery dataset.
-
 
 def get_gbq_data(filters, output_columns):
     """Uses pandas-gbq to download only columns of interest from
@@ -37,13 +41,27 @@ def get_gbq_data(filters, output_columns):
 
     # Query from Google BigQuery using service account
     project_id = "csci6118"
-    credentials = service_account.Credentials.from_service_account_file(
-        '../etc/csci6118-ee6fa23ab1b7.json')
+
+        # Read the content of the R script
+    if os.path.exists('csci6118-ee6fa23ab1b7.json'):
+        file = 'csci6118-ee6fa23ab1b7.json'
+    elif os.path.exists('etc/csci6118-ee6fa23ab1b7.json'):
+        file = 'etc/csci6118-ee6fa23ab1b7.json'
+    elif os.path.exists('../etc/csci6118-ee6fa23ab1b7.json'):
+        file = '../etc/csci6118-ee6fa23ab1b7.json'
+    else:
+        file = '../../etc/csci6118-ee6fa23ab1b7.json'
+    credentials = service_account.Credentials.from_service_account_file(file)
+        # '../etc/csci6118-ee6fa23ab1b7.json')
     query = f"""
     SELECT {cols_set_str}
     FROM csci6118.lanl_hiv_seq_db.results_all
     """
-    data = pd.read_gbq(query, project_id=project_id, credentials=credentials)
+    try:
+        data = pd.read_gbq(query, project_id=project_id, credentials=credentials)
+    except pandas_gbq.exceptions.GenericGBQException:
+        sys.exit("Pandas GBQ error, likely unrecognized column name.")
+    return data
 
     # Switch column names back into user-queried format
     revert = [
