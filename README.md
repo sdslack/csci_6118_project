@@ -76,7 +76,7 @@ Example distribution of values in query filters:
 
 ![QueryDistDaysFromInf](docs/query_2_Days%20from%20Infection_hist.png)
 
-![QueryDistRiskFactor](query_2_Risk%20Factor_hist.png)
+![QueryDistRiskFactor](docs/query_2_Risk%20Factor_hist.png)
 
 **Reach Goal: Automate visualization and searching**
 
