@@ -77,5 +77,5 @@ rule run_query:
         + "--query_cols_all_data_file '{output.all_data}' " \
         + "--output_columns 'SE id(SA), {params.col_list}' " \
         + "--query_request_file {output.req_summ} " \
-        + "--global_logical_operator '&&' " \
-        + "--file ../test/data/results_1_250000.csv"
+        + "--global_logical_operator '&&' "
+        # + "--file ../test/data/results_1_250000.csv"
