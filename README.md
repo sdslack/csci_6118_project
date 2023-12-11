@@ -70,13 +70,13 @@ Develop a codebase to summarize data from the HIV database:
 
 Example consort plot of how query selections filtered data:
 
-![ConsortPlot](docs_snakemake/query_2_consort_plot.png)
+![ConsortPlot](docs/query_2_consort_plot.png)
 
 Example distribution of values in query filters:
 
-![QueryDistDaysFromInf](docs_snakemake/query_2_Days_from_Infection_hist.png)
+![QueryDistDaysFromInf](docs/query_2_Days%20from%20Infection_hist.png)
 
-![QueryDistRiskFactor](query_2_Risk_Factor_hist.png)
+![QueryDistRiskFactor](query_2_Risk%20Factor_hist.png)
 
 **Reach Goal: Automate visualization and searching**
 
