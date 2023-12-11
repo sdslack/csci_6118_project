@@ -14,18 +14,20 @@ QUERIES = {
 col_names = []
 for key, val in QUERIES.items():
     for col in val.split(';'):
-        col_name = col.split(':')[0]
+        col_name = col.split(':')[0].strip()
         col_names.append(col_name)
 
-filenames = [
-    f"../docs_snakemake/{{query}}_{col_name}_hist.png"
-    for col_name in col_names
-]
+# filenames = [
+#     f"../docs_snakemake/{{query}}_{col_name}_hist.png"
+#     for col_name in col_names
+# ]
 
 rule all:
     input:
-        expand(filenames, query=list(QUERIES.keys())),
-        expand("../docs_snakemake/{query}_consort_plot.png", query=list(QUERIES.keys()))
+        # expand(filenames, query=list(QUERIES.keys())),
+        expand("../docs_snakemake/{query}_{col_name}_hist.png",
+               query=list(QUERIES.keys()), col_name=col_names),
+        expand("../docs_snakemake/{query}_consort_plot.png", query=list(QUERIES.keys())),
         # expand("../docs_snakemake/{query}_days_from_inf_counts.csv", query=list(QUERIES.keys()))
         # expand("../docs_snakemake/{query}_consort_plot.png", query=list(QUERIES.keys()))
         # expand("../docs_snakemake/{query}_request_summary.csv", query=list(QUERIES.keys()))
@@ -45,10 +47,12 @@ rule make_csv_counts:
         filt_data = "../docs_snakemake/{query}_filtered_data.csv"
     output:
         counts = "../docs_snakemake/{query}_{col_name}_counts.csv"
+    params:
+        col_name = lambda wildcards: wildcards.col_name
     shell:
         "python ../src/lkr/days_from_infection_plot.py " \
         + "--csv_file '{input.filt_data}' " \
-        + "--column_name '{col_name}' " \
+        + "--column_name '{params.col_name}' " \
         + "--output_file '{output.counts}' "
 
 rule make_consort:
