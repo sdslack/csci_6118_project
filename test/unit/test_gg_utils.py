@@ -354,3 +354,7 @@ class test_run_consort_plot_rcode(unittest.TestCase):
     @classmethod
     def tearDown(self):
         os.remove("../data/output.png")
+
+
+if __name__ == '__main__':
+    unittest.main()
