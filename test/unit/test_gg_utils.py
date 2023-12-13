@@ -273,18 +273,23 @@ class test_make_query_df_formatted(unittest.TestCase):
                 consort_input_data='../data/LANL_HIV1_2023_seq_metadata.csv')
 
     def test_empty_input(self):
-        query_df_formatted, filters_provided \
-            = pf.make_query_df_formatted(
+        query_df_formatted, filters_provided = pf.make_query_df_formatted(
             filters=self.filters,
-            consort_input_data=self.empty_consort_input_data)
+            consort_input_data=self.empty_consort_input_data
+        )
         self.assertEqual(len(query_df_formatted), 0)
-        query_df_formatted_e2, \
-            filters_provided_e2 = pf.make_query_df_formatted(
+
+        query_df_formatted_e2, filters_provided_e2 = (
+            pf.make_query_df_formatted)(
             filters=self.emptyfilters,
-            consort_input_data=self.consort_input_data)
+            consort_input_data=self.consort_input_data
+        )
         self.assertEqual(len(query_df_formatted_e2), 0)
-        (query_df_formatted_e3, filters_provided_e3) = pf.make_query_df_formatted(
-            query_summary_file="../data/query_requests_empty.csv")
+
+        (query_df_formatted_e3, filters_provided_e3) = (
+            pf.make_query_df_formatted)(
+            query_summary_file="../data/query_requests_empty.csv"
+        )
         self.assertEqual(len(query_df_formatted_e3), 0)
 
     def test_success_filter_querydf(self):
