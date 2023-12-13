@@ -272,7 +272,7 @@ class TestQueryData(unittest.TestCase):
     def test_create_numeric_mask(self):
         data_long = pd.DataFrame({
             'Column_1': [
-                'Drug', 'Heterosexual', 'unspecified',
+                'Drug', 'Heterosexual, unspecified',
                 'Mom to Child', 'Sex Worker', 'None'
             ],
             'Column_2': [1, 90, 45, 123, 250],
