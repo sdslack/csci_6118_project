@@ -7,8 +7,9 @@ sys.path.insert(0, '../src/sds')  # noqa
 import gbq_utils as gbq_utils
 import pandas as pd
 
-#### add global && and || between different columns and keep OR operation between multiple filters within a column 
-#### user can only enter only && or only || otherwise there will be an error 
+# add global && and || between different columns
+# keep OR operation between multiple filters within a column
+# user can only enter only && or only || otherwise there will be an error
 
 parser = argparse.ArgumentParser(
     description="Query and display data with filters. Automatically " +
@@ -45,7 +46,7 @@ parser.add_argument("--query_request_file",
 parser.add_argument("--global_logical_operator",
                     type=str,
                     help="|| or && if multiple filter columns",
-                    default = "")
+                    default="")
 
 args = parser.parse_args()
 
@@ -58,7 +59,7 @@ def main():
     else:
         # Get only columns of interest using Google BigQuery
         data = gbq_utils.get_gbq_data(args.filters, args.output_columns)
-    
+
     if args.query_cols_all_data_file is not None:
         data.to_csv(args.query_cols_all_data_file, index=False)
         print(f"All data for queried and requested columns saved to " +
@@ -70,12 +71,14 @@ def main():
             filter_args = query.split_arguments(args.filters)
             filters = query.get_filters(filter_args)
 
-        # check for logical operator 
-        operator = query.check_for_logical_operator(filters, args.global_logical_operator)
-        
+        # check for logical operator
+        operator = query.check_for_logical_operator(
+            filters, args.global_logical_operator)
+
         # filter the data
         output_cols = args.output_columns.split(',')
-        filtered_data = query.filter_data(data, filters, output_cols, operator.strip())
+        filtered_data = query.filter_data(
+            data, filters, output_cols, operator.strip())
 
         # make the query request summary data frame
         query_request_df = query.make_query_request_summary(filters,
