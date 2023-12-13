@@ -33,6 +33,10 @@ jobs:
          - run: |
             cd test/unit
             python test_lkr_utils.py
+            python test_sds_utils.py
+            python test_jb_query_utils.py
+            python test_gg_utils.py
+            python test_gbq_utils.py
             
           
     run_func_tests:
@@ -49,4 +53,8 @@ jobs:
          - run: |
                 cd test/func
                 bash test_days_from_infection_plot.sh
+                bash test_count.sh
+                bash test_get_queried_data.sh
+                bash test_plot_hist.bash
+                bash test_prep_and_create_consort.sh
            
