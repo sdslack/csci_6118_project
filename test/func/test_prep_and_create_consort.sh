@@ -5,7 +5,7 @@ run functional_run_filters python3 src/gg/create_consort.py --consort_input_file
 assert_equal $'test/data/Dec3_filters_Consort_Plot.png' $( ls $'test/data/Dec3_filters_Consort_Plot.png' )
 assert_exit_code 0
 
-run functional_run_files python3 src/gg/create_consort.py --consort_input_file_path "data/LANL_HIV1_2023_seq_metadata.csv" --query_summary_file "docs/query_request_summary.csv"  --out_consort_png "test/data/Dec3_files_Consort_Plot.png" --bool_out_csv "test/data/Dec3_filtered_consort_input_df.csv"
+run functional_run_files python3 src/gg/create_consort.py --consort_input_file_path "test/data/LANL_HIV1_2023_seq_metadata.csv" --query_summary_file "docs/query_request_summary.csv"  --out_consort_png "test/data/Dec3_files_Consort_Plot.png" --bool_out_csv "test/data/Dec3_filtered_consort_input_df.csv"
 assert_equal $'test/data/Dec3_files_Consort_Plot.png' $( ls $'test/data/Dec3_files_Consort_Plot.png' )
 assert_equal $'test/data/Dec3_filtered_consort_input_df.csv' $( ls $'test/data/Dec3_filtered_consort_input_df.csv' )
 assert_exit_code 0
