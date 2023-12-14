@@ -56,5 +56,6 @@ jobs:
                 bash test_count.sh
                 bash test_get_queried_data.sh
                 bash test_plot_hist.bash
-                bash test_prep_and_create_consort.sh
+                cd ../..
+                bash test/func/test_prep_and_create_consort.sh
            
