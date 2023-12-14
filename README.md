@@ -1,8 +1,5 @@
 # **Overview**
 
-Other group TODOs:
-+ listed a few throughout, always starting with TODO!
-
 ### **Scientific Background**
 
 The challenge of curing HIV:
@@ -47,18 +44,40 @@ the data available in the database before deciding what to download, as well
 as to offer an understanding of how different filtering choices would affect
 how many and which entries from the dataset are downloaded. 
 
+Our project is meant for broad researching. However, we focused our test data on a specific question:
+
+- Is there a difference in the availability of sequences at early stages of infection for HIV viruses suspected to have been transmitted sexually versus HIV viruses which have spread among people who inject drugs?
+
+
 **What is the problem with manual queries?**
 
 Manual queries require that the user define the query without having
-an idea of the distribution of information that is availabe. Additionally,
+an idea of the distribution of information that is available. Additionally,
 they are not very reproducible. 
 
 **Why is this important?**
+
 
 + Understanding of data availability for research questions
 + Understanding of research gaps and need for novel research
 + Removing unwanted biases in data download from large public portals
 + Improving reproducibility of searching and data download
+
+For our research question specifically: 
+
+The reason we chose this question is because the UN and CDC have identified people who inject drugs (PWID) as a key population among which HIV spreads. In fact, 1 in 8 PWID are positive for HIV.
+They are also a difficult population to reach, as many are homeless, have low access to health care, and have or are currently incarcerated.
+
+Yet previous scientific reports have claimed that HIV viruses may be more diverse (and therefore need to be monitored more closely) because "sexual transmission selects for viral characteristics that facilitate crossing the mucosal barrier of the recipient’s genital tract, although the specific selective forces or advantages are not completely defined (Kariuki et al., 2017). Virus transmitted directly into the blood stream does not have this transmission bottleneck.
+
+By understanding differences in sequence availability, we can also identify biases in our dataset and understand the research gap within key populations (like PWID).
+
+Sources:
+
+Kariuki, S. M., Selhorst, P., Ariën, K. K., & Dorfman, J. R. (2017). The HIV-1 transmission bottleneck. Retrovirology, 14(1), 22. https://doi.org/10.1186/s12977-017-0343-8
+
+Center for Disease Control (2021). HIV and People who Inject Drugs. https://www.cdc.gov/hiv/group/hiv-idu.html
+
 
 **Goal: Understand available data**
 
@@ -77,6 +96,8 @@ Example distribution of values in query filters:
 ![QueryDistDaysFromInf](docs/query_2_Days%20from%20Infection_hist.png)
 
 ![QueryDistRiskFactor](docs/query_2_Risk%20Factor_hist.png)
+
+For example here, we see less data in early days of infection. This is an issue especially when we want to understand transmission dynamics (before HIV starts evolving within its new human host).
 
 **Reach Goal: Automate visualization and searching**
 
@@ -103,12 +124,12 @@ python function, and an example snakefile is included in workflow/.
 **Conda Environment with all Dependencies**
 
 A conda environment file with all of the necessary dependencies to
-run the source code has been provided at etc/csci6118_env.yml. To create
+run the source code has been provided at .github/csci6118_env.yml. To create
 a new conda environment from this file and then activate that environment,
 you can run the following:
 
 ```bash
-conda env create --file etc/csci6118_env.yml
+conda env create --file .github/csci6118_env.yml
 conda activate csic6118_env
 ```
 
@@ -160,14 +181,14 @@ cd csci_6118_project
 ls
 ```
 ```
-LICENSE  README.md  docs  docs_snakemake  etc  src  test  workflow
+LICENSE  README.md  docs  docs_snakemake  src  test  workflow
 ```
 
 This document is the README.md, docs/ contains any data or plots written
 out by the currently implemented code, src/ contains the source code
 for this project, and test/ contains the unit and functional tests. The
 workflow/ directory contains the snakefile for snakemake automation, and
-the etc/ directory contains the conda environment recipe file with all
+the .github/ directory contains the conda environment recipe file with all
 dependencies and Google service account access to the BigQuery hosted
 LANL sequence metadata.
 
@@ -206,13 +227,20 @@ Functional tests can be run with the following code:
 cd /test/func
 bash test_sds_utils.sh
 ```
+As a note, functional tests for the code in the src/gg directory was 
+intended to be run outside of the test folder. Therefore, this functional
+tests should be run as:
+
+```bash
+bash test/func/test_prep_and_create_consort.sh
+```
 
 Style tests for python (PEP8, tested using pycodestyle), are executed when
 any branch is pushed to the GitHub-hosted repository as well as when a pull
 request is made on the main branch on GitHub. The code that runs these tests
 is located at .github/workflows/tests.yml. In order to run pycodestyle, the
 tests automatically set up a mamba environment "csci6118" using an environment
-file at test/etc/csci6118_env.yml
+file at .github/csci6118_env.yml
 
 # **Usage**
 
@@ -297,8 +325,7 @@ bash run_query_data.sh
 ```
 
 ```bash
-cd src/gg
-bash run.sh
+bash src/gg/run.sh
 ```
 
 # **Functions**
@@ -310,16 +337,15 @@ bash run.sh
 Within the src/gg folder, all scripts help create 
     a .png file containing a consort diagram. This diagram helps explain
     which sequences were excluded or included based on given search criteria.
-    A run.sh file has been provided as an example.
-    The scripts must be run in the following order:
-    1. query_functions.py to allow for creation of important functions
-        There are two different functions within this file.
-        subset_dataframe_by_names() will subset a dataset by column name.
-        output_query_summary() changes the query.csv file to reflect
-            query parameters.
-    2. make_query.py to create queries for the database
-    3. data_subsetting.py to prepare the data for the R scropt
-    4. consort_plot.r which will generate the consort plot
+
+The scripts must be run in the following order:
+1. consort_prep_functions.py to allow for creation of important functions
+    which will be called to create the consort diagram
+2. consort_plot.r which contains a function which will convert a dataframe
+    into a ggplot consort diagram
+3. create_consort.py to call the functions in consort_prep_functions
+    and the function in consort_plot.r
+    to create a consort diagram when run.
     
 **src/sds**
 
@@ -431,15 +457,11 @@ In the jb folder within the source folder, is the query_data.py script that will
 - Criteria for each column separated by a comma will be interpreted as OR operations UNLESS there are multiple != statements which will be read as AND operations.
     
 
-The code will take in four main parameters:
-
-# TODO: Sarah made the --file parameter optional, so if not given the code
-# automatically queries the entire dataset on Google BigQuery. It also looks
-# like there are more parameters now too? Might be worth printing out the help
-# function (exampel above in SDS section). 
+The code will take in several key parameters:
 
 1. --file: Name of file and path to file
     - Only takes in a csv.
+    - This parameter is optional, so if not given, the code automatically queries the entire dataset on Google BigQuery.
 2. --filters: Filters for any variables both categorical and numerical. 
     - This is not a required filter.
     - This parameter also takes in the input as a string. 
@@ -462,7 +484,10 @@ The code will take in four main parameters:
     - If provided, columns need to be comma separated.
 6. --query_request_file: Name of query request summary and path to file
     - File is written out as csv.
-7. --global_logical_operator: The logical operator (&& or ||) that is used to describe how to filter between columns.
+7. --bool_out_csv: File path ending in .csv specifying where to save data on how the filter function is filtering each column.
+    - This is optional
+8. --out_consort_png: File path ending in .png specifying where to store the consort plot diagram.
+9. --global_logical_operator: The logical operator (&& or ||) that is used to describe how to filter between columns.
     - Takes in either && or ||
     - Example --> --filter: "col1: =3; col2: <5" --global_logical_operator '&&'
         - This example will output a filtered dataset where all rows are both =3 in col1 and <5 in col2.
