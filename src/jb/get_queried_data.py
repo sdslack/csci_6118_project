@@ -1,12 +1,12 @@
 import argparse
 import query_utils as query
 import sys
+import pandas as pd
+sys.path.insert(0, '../../src/sds')  # noqa
+import gbq_utils as gbq_utils
 sys.path.insert(0, 'sds')  # noqa
 sys.path.insert(0, '../sds')  # noqa
 sys.path.insert(0, '../src/sds')  # noqa
-sys.path.insert(0, '../../src/sds')  # noqa
-import gbq_utils as gbq_utils
-import pandas as pd
 
 # add global && and || between different columns
 # keep OR operation between multiple filters within a column
