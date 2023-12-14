@@ -166,7 +166,7 @@ def query_file_to_filter(query_summary_file):
     Returns
     -------
     filters: A dictionary
-        Listing how data should be filtered
+        Listing how data should be filtered.
     """
     try:
         query_summary_file_pd = pd.read_csv(query_summary_file)
