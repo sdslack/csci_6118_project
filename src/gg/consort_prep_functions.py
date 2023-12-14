@@ -218,7 +218,7 @@ def make_query_df_formatted(filters=None, query_summary_file=None,
 
     consort_input_data:
         Must be specified when filters are given.
-        The data to filter, in a pandas dataframe.
+        A pandas dataframe containing the data to filter.
 
     Returns
     -------

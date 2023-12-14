@@ -36,8 +36,7 @@ def get_args():
 
 def main():
     args = get_args()
-    consort_input_file_path = str(args.consort_input_file_path)
-    consort_input_data = query.load_data(consort_input_file_path)
+    consort_input_data = query.load_data(args.consort_input_file_path)
     filters = args.filters
     query_summary_file = args.query_summary_file
     query_df_formatted, filters_provided = pf.make_query_df_formatted(
