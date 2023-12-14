@@ -8,8 +8,8 @@ from google.oauth2 import service_account
 import pandas as pd
 import os
 import sys
-sys.path.insert(0, '../etc')  # noqa
-sys.path.insert(0, '../../etc')  # noqa
+sys.path.insert(0, '../.github')  # noqa
+sys.path.insert(0, '../../.github')  # noqa
 import pandas_gbq.exceptions
 
 # To note: this script uses a service account private key
@@ -46,14 +46,14 @@ def get_gbq_data(filters, output_columns):
     # Read the content of the R script
     if os.path.exists('csci6118-ee6fa23ab1b7.json'):
         file = 'csci6118-ee6fa23ab1b7.json'
-    elif os.path.exists('etc/csci6118-ee6fa23ab1b7.json'):
-        file = 'etc/csci6118-ee6fa23ab1b7.json'
-    elif os.path.exists('../etc/csci6118-ee6fa23ab1b7.json'):
-        file = '../etc/csci6118-ee6fa23ab1b7.json'
+    elif os.path.exists('.github/csci6118-ee6fa23ab1b7.json'):
+        file = '.github/csci6118-ee6fa23ab1b7.json'
+    elif os.path.exists('../.github/csci6118-ee6fa23ab1b7.json'):
+        file = '../.github/csci6118-ee6fa23ab1b7.json'
     else:
-        file = '../../etc/csci6118-ee6fa23ab1b7.json'
+        file = '../../.github/csci6118-ee6fa23ab1b7.json'
     credentials = service_account.Credentials.from_service_account_file(file)
-    # '../etc/csci6118-ee6fa23ab1b7.json')
+    # '../.github/csci6118-ee6fa23ab1b7.json')
     query = f"""
     SELECT {cols_set_str}
     FROM csci6118.lanl_hiv_seq_db.results_all
