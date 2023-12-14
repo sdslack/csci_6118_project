@@ -155,7 +155,7 @@ cd csci_6118_project
 ls
 ```
 ```
-LICENSE  README.md  docs  docs_snakemake  etc  src  test  workflow
+LICENSE  README.md  docs  docs_snakemake  src  test  workflow
 ```
 
 This document is the README.md, docs/ contains any data or plots written
