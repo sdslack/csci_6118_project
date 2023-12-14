@@ -1,8 +1,3 @@
-# **Overview**
-
-Other group TODOs:
-+ listed a few throughout, always starting with TODO!
-
 ### **Scientific Background**
 
 The challenge of curing HIV:
@@ -431,15 +426,11 @@ In the jb folder within the source folder, is the query_data.py script that will
 - Criteria for each column separated by a comma will be interpreted as OR operations UNLESS there are multiple != statements which will be read as AND operations.
     
 
-The code will take in four main parameters:
-
-# TODO: Sarah made the --file parameter optional, so if not given the code
-# automatically queries the entire dataset on Google BigQuery. It also looks
-# like there are more parameters now too? Might be worth printing out the help
-# function (exampel above in SDS section). 
+The code will take in seven main parameters:
 
 1. --file: Name of file and path to file
     - Only takes in a csv.
+    - --file parameter optional, so if not given the code, automatically queries the entire dataset on Google BigQuery.
 2. --filters: Filters for any variables both categorical and numerical. 
     - This is not a required filter.
     - This parameter also takes in the input as a string. 
