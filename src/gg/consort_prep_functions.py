@@ -137,7 +137,7 @@ def consort_filter_data(data, filters,
     if bool_out_csv is not None:
         try:
             bool_out_csv_str = str(bool_out_csv)
-        except(ValueError):
+        except (ValueError):
             print("bool_out_csv must be a file path string")
         if not bool_out_csv_str.endswith(".csv"):
             raise KeyError("File path must end with .csv")
@@ -150,7 +150,7 @@ def consort_filter_data(data, filters,
             sys.exit(1)
 
     # Output pandas dataframe for use in R
-    return(consort_input_df)
+    return consort_input_df
 
 
 def query_file_to_filter(query_summary_file):
