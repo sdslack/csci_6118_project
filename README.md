@@ -1,5 +1,3 @@
-# **Overview**
-
 ### **Scientific Background**
 
 The challenge of curing HIV:
@@ -46,7 +44,8 @@ how many and which entries from the dataset are downloaded.
 
 Our project is meant for broad researching. However, we focused our test data on a specific question:
 
-- Is there a difference in the availability of sequences at early stages of infection for HIV viruses suspected to have been transmitted sexually versus HIV viruses which have spread among people who inject drugs?
+- Is there a difference in the availability of sequences at early stages of infection for HIV viruses 
+suspected to have been transmitted sexually versus HIV viruses which have spread among people who inject drugs?
 
 
 **What is the problem with manual queries?**
@@ -65,12 +64,19 @@ they are not very reproducible.
 
 For our research question specifically: 
 
-The reason we chose this question is because the UN and CDC have identified people who inject drugs (PWID) as a key population among which HIV spreads. In fact, 1 in 8 PWID are positive for HIV.
-They are also a difficult population to reach, as many are homeless, have low access to health care, and have or are currently incarcerated.
+The reason we chose this question is because the UN and CDC have identified people who inject drugs (PWID)
+as a key population among which HIV spreads. In fact, 1 in 8 PWID are positive for HIV.
+They are also a difficult population to reach, as many are homeless, have low access to health care,
+and have or are currently incarcerated.
 
-Yet previous scientific reports have claimed that HIV viruses may be more diverse (and therefore need to be monitored more closely) because "sexual transmission selects for viral characteristics that facilitate crossing the mucosal barrier of the recipient’s genital tract, although the specific selective forces or advantages are not completely defined (Kariuki et al., 2017). Virus transmitted directly into the blood stream does not have this transmission bottleneck.
+Yet previous scientific reports have claimed that HIV viruses may be more diverse 
+(and therefore need to be monitored more closely) because 
+"sexual transmission selects for viral characteristics that facilitate crossing the mucosal barrier of the 
+recipient’s genital tract, although the specific selective forces or advantages are not completely defined" (Kariuki et al., 2017).
+Virus transmitted directly into the blood stream does not have this transmission bottleneck.
 
-By understanding differences in sequence availability, we can also identify biases in our dataset and understand the research gap within key populations (like PWID).
+By understanding differences in sequence availability, 
+we can also identify biases in our dataset and understand the research gap within key populations (like PWID).
 
 Sources:
 
@@ -218,7 +224,7 @@ Unit tests can be run with the following code:
 
 ```bash
 cd /test/unit
-python -m unittest test_sds_utils.py
+python test_sds_utils.py
 ```
 
 Functional tests can be run with the following code:
