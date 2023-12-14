@@ -192,7 +192,7 @@ Unit tests can be run with the following code:
 
 ```bash
 cd /test/unit
-python -m unittest test_sds_utils.py
+python test_sds_utils.py
 ```
 
 Functional tests can be run with the following code:
